@@ -36,6 +36,8 @@ int main(){
 
 	init_fan_pwm();
 
+	sei();
+
 	while(1){
 		RS485_Buffer_t * buf = update_rs485_com();
 
@@ -47,7 +49,7 @@ int main(){
 			switch(buf->command)
 			{
 				case 1: set_pwm(1, val);
-				case 2: set_pwm(1, val);
+				case 2: set_pwm(2, val);
 			}
 		}
 		_delay_us(100);
