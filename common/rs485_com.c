@@ -1,6 +1,5 @@
 
 #include "rs485_com.h"
-#include "uart/uart.h"
 #include <string.h>
 
 static RS485_Buffer_t rx_buff;
@@ -10,7 +9,7 @@ static uint8_t rx_index;
 RS485_Buffer_t *update_rs485_com(void)
 {
     uint8_t c;
-    if (!uart_1_getc_nb(&c))
+    if (!uart_getc_nb(&c))
         return 0;
 
     if (!(rx_index < sizeof(rx_buff)))
@@ -63,6 +62,6 @@ void rs485_transmit(uint8_t address, uint8_t command, uint8_t *extra_data, uint8
 
     for (uint8_t i=0; i<len; i++)
     {
-        uart_1_putc(tx_buff.bytes[i]);
+        uart_putc(tx_buff.bytes[i]);
     }
 }

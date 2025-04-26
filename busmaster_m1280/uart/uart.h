@@ -40,10 +40,8 @@ void uart_1_putstr_P(PGM_P str);
 uint8_t uart_1_getc(void);
 char uart_1_getc_nb(uint8_t *c);		// non blocking, returns 1 on success
 
-#ifdef UART_HEXDUMP
-	//hexdump utility
-	void uart_hexdump(uint8_t *buf, int len);
-#endif
+//hexdump utility
+void uart_hexdump(uint8_t *buf, int len);
 
 #ifdef UART_GETLINE
 	//get one Cariage return terminated line

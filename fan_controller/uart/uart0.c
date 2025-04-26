@@ -7,4 +7,6 @@
 #define RS485_DE_PORT  PORTD
 #define RS485_DE_PIN   PD6
 
+#include "uart.h"
+
 #include "uart.c"

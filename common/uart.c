@@ -5,8 +5,6 @@
 #include <avr/interrupt.h>
 #include <stdlib.h>
 
-#include "uart.h"
-
 #if defined(__AVR_ATmega1280__)
 	#if defined(USE_UART_1)
 		#define UCSRB UCSR1B

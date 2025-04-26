@@ -1,4 +1,10 @@
 *.o
 *.elf
 .vscode/
+*.bin
+*.hex
+*.lst
+*.map
+*.srec
+
 

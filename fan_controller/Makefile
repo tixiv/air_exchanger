@@ -8,6 +8,7 @@ AVRDUDE ?="/mnt/c/Users/tixiv/bin/avrdude.exe"
 FLASHCMD       = $(AVRDUDE) -p $(MCU_TARGET) -c usbasp -U $(PRG).hex
 RESETCMD       = $(AVRDUDE) -p $(MCU_TARGET) -c usbasp
 
+INCLUDES       = -I ../common/
 DEFS           = -DF_CPU=11059200
 LIBS           =
 
@@ -17,7 +18,7 @@ CC             = avr-gcc
 
 # Override is only needed by avr-lib build system.
 
-override CFLAGS        =  -g -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS)
+override CFLAGS        =  -g -Wall $(OPTIMIZE) -mmcu=$(MCU_TARGET) $(DEFS) $(INCLUDES)
 override LDFLAGS       = -Wl,-Map,$(PRG).map
 
 OBJCOPY        = avr-objcopy
