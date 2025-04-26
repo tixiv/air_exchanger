@@ -38,6 +38,7 @@ RS485_Buffer_t *update_rs485_com(void)
         if (rx_index >= length-1)
         {
             // done
+            rx_index = 0;
             return &rx_buff;
         }
     }
