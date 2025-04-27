@@ -11,6 +11,7 @@
 #include "rs485_com.h"
 #include "fan_pwm.h"
 #include "adc.h"
+#include "rs485_structs.h"
 
 
 void init_ports(void)
@@ -30,15 +31,8 @@ void init_ports(void)
   DDRD = 0x72;
 }
 
-
-struct {
-	int16_t temperatures[4];
-} tx_data;
-
-struct {
-	uint16_t fan_pwm[2];
-} rx_data;
-
+fan_out_data_t tx_data;
+fan_in_data_t rx_data;
 
 int main(){
 	init_ports();

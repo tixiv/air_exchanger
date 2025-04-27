@@ -10,10 +10,12 @@
 #include "uart/uart.h"
 #include "rs485_com.h"
 #include "adc.h"
+#include "rs485_structs.h"
 
 
 void init_ports(void)
 {
+	// PA3 : RS485 /RE
 	// PA4 : /Stosslueftung in
 	// PA5 : /Enable in
 	// PA6 : 24V enable
@@ -28,21 +30,13 @@ void init_ports(void)
 	PORTC = 1;
 	DDRC = 0xc3;
 
+	// PD5 : RS485 DE
 	PORTD = 5;
 	DDRD = 0x3a;
-
-	PORTA |= 8;
-	PORTD &= 0xdf;
 }
 
-struct {
-	uint16_t adc_values[2];
-	uint8_t inputs;
-} tx_data;
-
-struct {
-	uint8_t power_flags;
-} rx_data;
+mainboard_out_data_t tx_data;
+mainboard_in_data_t rx_data;
 
 void set_fan_power(uint8_t state)
 {

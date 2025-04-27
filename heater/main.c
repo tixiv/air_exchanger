@@ -9,6 +9,7 @@
 
 #include "uart/uart.h"
 #include "rs485_com.h"
+#include "rs485_structs.h"
 
 void init_ports(void)
 {
@@ -26,26 +27,15 @@ void init_ports(void)
 	PORTC = 0;
 	DDRC = 1;
 
-	PORTD = 0;
+	PORTD = 1; // pullup on RXD
 	DDRD = 0;
 }
 
-struct {
-	uint8_t heater_duty_readback;
-} tx_data;
+heater_out_data_t tx_data;
+heater_in_data_t rx_data;
 
-struct {
-	uint8_t heater_duty; // 0-100% dutycycle
-} rx_data;
-
-
-struct {
-	uint16_t fan_pwm[2];
-} rx_data_fan;
-
-struct {
-	uint8_t power_flags;
-} rx_data_main;
+fan_in_data_t rx_data_fan;
+mainboard_in_data_t rx_data_main;
 
 void heater_on()
 {
@@ -159,6 +149,7 @@ int main(){
 
 		if(++m == 10)
 		{
+			m = 0;
 			update_heater();
 		}
 		_delay_ms(1);
