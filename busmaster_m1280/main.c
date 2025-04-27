@@ -121,7 +121,9 @@ void print_status(void)
 		printf(", ");
 	}
 
-	printf("Fan1: %d, Fan2: %d, Heater: %d\r\n", fan_tx_data.fan_pwm[0], fan_tx_data.fan_pwm[1], heater_rx_data.heater_duty_readback);
+	printf("Fan1: %d, Fan2: %d, Heater: %d, ", fan_tx_data.fan_pwm[0], fan_tx_data.fan_pwm[1], heater_rx_data.heater_duty_readback);
+
+	printf("ADC0: %d, ADC1: %d\r\n", mainboard_rx_data.adc_values[0], mainboard_rx_data.adc_values[1]);
 }
 
 #define PC_BUF_SIZE 100

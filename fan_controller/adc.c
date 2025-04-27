@@ -16,34 +16,36 @@ uint16_t read_adc_channel(uint8_t channel)
     return ADCW;  
 }
 
-static uint16_t adc_values[6];
+static uint16_t adc_values[4];
 
 static void readADC(void)
 {
-    adc_values[0] = read_adc_channel(0);
-    adc_values[1] = read_adc_channel(1);
-    adc_values[2] = read_adc_channel(2);
-    adc_values[3] = read_adc_channel(3);
-    adc_values[4] = read_adc_channel(4);
-    adc_values[5] = read_adc_channel(6);
+    // The temperature measurement channels are marked in this order in the user manual.
+    // better reverse them in the very beginning to have no confusion.
+    adc_values[3] = read_adc_channel(0); // T4
+    adc_values[2] = read_adc_channel(1); // T3
+    adc_values[1] = read_adc_channel(2); // T2
+    adc_values[0] = read_adc_channel(3); // T1
+
+    // adc_values[4] = read_adc_channel(4);
+    // adc_values[5] = read_adc_channel(6);
 }
 
-static uint16_t filter_akk[6];
+static uint16_t filter_akk[4];
 
-uint16_t adc_filtered[6];
+uint16_t adc_filtered[4];
 int16_t temperatures[4];
 
 
 static void filterAdc()
 {
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 4; i++)
     {
         uint16_t val = filter_akk[i] + adc_values[i] - adc_filtered[i];
         filter_akk[i] = val;
         adc_filtered[i] = val >> 4;
     }
 }
-
 
 static void convertTemperatures()
 {
