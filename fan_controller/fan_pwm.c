@@ -65,10 +65,12 @@ void init_fan_pwm_with_mode(uint8_t mode, uint8_t use_timer1)
 
 void init_fan_pwm()
 {
-    if (PINC & 0x40) {
+    if (PINC & 0x40) // Dip Switch 2
+    {
         init_fan_pwm_with_mode(0, 1);
     }
     else {
+        // 0-10V Ananlog mode (Dip 2 on)
         init_fan_pwm_with_mode(2, 1);
     }
 }

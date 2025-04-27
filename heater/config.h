@@ -1,0 +1,7 @@
+
+
+#define UART_INTERRUPT
+#define UART_BAUD_RATE 9600
+
+#define UART_RXBUFSIZE 32
+#define UART_TXBUFSIZE 32

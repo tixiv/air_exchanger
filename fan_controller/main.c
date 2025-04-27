@@ -21,6 +21,8 @@ void init_ports(void)
   PORTB = 3;
   DDRB = 0xbf;
   
+  // PC6: Dip Switch 2
+  // PC7: Dip Switch 1
   PORTC = 0;
   DDRC = 3;
 
