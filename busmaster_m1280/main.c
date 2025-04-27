@@ -23,17 +23,43 @@ void printHex(uint8_t b)
 	uart_0_putc(' ');
 }
 
-
-void receive_from_rs485()
+struct
 {
-	RS485_Buffer_t *buff = update_rs485_com();
+	uint16_t fan_pwm[2];
+} fan_tx_data;
 
-	if(buff)
+struct
+{
+	int16_t temperatures[4];
+} fan_rx_data;
+
+void handle_rs485()
+{
+	static int delay_count;
+
+	RS485_Buffer_t *received = update_rs485_com();
+
+	if(received)
 	{
 		rs485_akt = 1;
 
-		uart_hexdump(buff->bytes, 32);
+		//uart_hexdump(received->bytes, 32);
 
+		if (received->address == 1 && received->command == 4)
+		{
+			memcpy(&fan_rx_data, received->data, sizeof(fan_rx_data));
+
+			char buf[64];
+			sprintf(buf, "%d, %d, %d, %d\r\n", fan_rx_data.temperatures[0], fan_rx_data.temperatures[1], fan_rx_data.temperatures[2], fan_rx_data.temperatures[3]);
+
+			uart_0_putstr(buf);
+		}
+	}
+
+	if (delay_count++ == 10000)
+	{
+		delay_count = 0;
+		rs485_transmit(4, 1, &fan_tx_data, sizeof(fan_tx_data));
 	}
 }
 
@@ -61,8 +87,9 @@ void handle_pc(){
 			
 			/* line received from PC */
 
-			uart_0_putstr(buffer); //echo to PC
+			// uart_0_putstr(buffer); //echo to PC
 
+			/*
 			int fan_id;
 			int value;
 
@@ -70,6 +97,7 @@ void handle_pc(){
 			{
 				rs485_transmit(4, fan_id, (uint8_t*)&value, 2);
 			}
+				*/
 		}
 	}
 }
@@ -120,7 +148,7 @@ int main(){
 	uart_0_putstr("Hallo\r\n");
 	
 	while(1){
-		receive_from_rs485();
+		handle_rs485();
 		handle_pc();
 		handle_leds();
 		_delay_us(100);

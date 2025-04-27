@@ -47,14 +47,14 @@ RS485_Buffer_t *update_rs485_com(void)
     return 0;
 }
 
-void rs485_transmit(uint8_t address, uint8_t command, uint8_t *extra_data, uint8_t extra_len)
+void rs485_transmit(uint8_t address, uint8_t command, void *extra_data, uint8_t extra_len)
 {
     static RS485_Buffer_t tx_buff = {.bytes = {0x55, 0xaa}};
 
     tx_buff.address = address;
     tx_buff.command = command;
     tx_buff.extra_len = extra_len;
-    if (extra_len)
+    if (extra_len && extra_data)
     {
         memcpy(tx_buff.data, extra_data, extra_len);
     }

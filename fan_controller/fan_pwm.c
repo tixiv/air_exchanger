@@ -73,15 +73,8 @@ void init_fan_pwm()
     }
 }
 
-void set_pwm(uint8_t fan, uint16_t value)
+void set_pwm(uint16_t fan1, uint16_t fan2)
 {
-    if (fan == 1)
-    {
-        OCR1A = value;
-    }
-
-    if (fan == 2)
-    {
-        OCR1B = value;
-    }
+    OCR1A = fan1;
+    OCR1B = fan2;
 }

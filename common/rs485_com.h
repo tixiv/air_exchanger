@@ -15,4 +15,4 @@ typedef union {
 
 RS485_Buffer_t *update_rs485_com(void);
 
-void rs485_transmit(uint8_t address, uint8_t command, uint8_t *extra_data, uint8_t extra_data_len);
+void rs485_transmit(uint8_t address, uint8_t command, void *extra_data, uint8_t extra_data_len);
