@@ -26,4 +26,5 @@ typedef struct {
 
 typedef struct {
 	uint8_t heater_duty_readback;
+	int16_t temperatures[2];
 } heater_out_data_t;

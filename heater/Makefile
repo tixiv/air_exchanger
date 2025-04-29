@@ -1,5 +1,5 @@
 PRG            = image
-OBJ            = main.o uart/uart0.o rs485_com.o
+OBJ            = main.o uart/uart0.o rs485_com.o adc.o conversion_table.o
 MCU_TARGET     = atmega32
 OPTIMIZE       = -Os
 

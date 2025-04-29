@@ -10,6 +10,7 @@
 #include "uart/uart.h"
 #include "rs485_com.h"
 #include "rs485_structs.h"
+#include "adc.h"
 
 void init_ports(void)
 {
@@ -104,6 +105,7 @@ void update_heater()
 int main(){
 	init_ports();
 	uart_init();
+	init_adc();
 
 	_delay_ms(100);
 
@@ -126,6 +128,8 @@ int main(){
 			if (buf->address == 5 && buf->command == 1)
 			{
 				memcpy(&rx_data, buf->data, sizeof(rx_data));
+
+				memcpy(tx_data.temperatures, temperatures, sizeof(tx_data.temperatures));
 
 				rs485_transmit(1, 5, &tx_data, sizeof(tx_data));
 
@@ -152,6 +156,7 @@ int main(){
 			m = 0;
 			update_heater();
 		}
+		update_adc();
 		_delay_ms(1);
 	}
 }
