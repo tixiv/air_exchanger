@@ -19,10 +19,13 @@ void rs485_uart_init() {
         .backup_before_sleep = false  // Explicit initialization
     }
   };
+
+  ESP_ERROR_CHECK(uart_driver_install(UART_NUM_2, 1024, 0, 0, NULL, 0));
   
-  uart_param_config(UART_NUM_2, &uart_config);
-  uart_set_pin(UART_NUM_2, 17, 16, 18, UART_PIN_NO_CHANGE);
-  uart_set_mode(UART_NUM_2, UART_MODE_RS485_HALF_DUPLEX);
+  ESP_ERROR_CHECK(uart_param_config(UART_NUM_2, &uart_config));
+  ESP_ERROR_CHECK(uart_set_pin(UART_NUM_2, 17, 16, 18, UART_PIN_NO_CHANGE));
+  ESP_ERROR_CHECK(uart_set_mode(UART_NUM_2, UART_MODE_RS485_HALF_DUPLEX));
+
 }
 
 void uart_putc(uint8_t c)

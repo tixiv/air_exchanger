@@ -104,7 +104,7 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 static void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-        .broker.address.hostname = "homeassistant.local",
+        .broker.address.uri = "mqtt://homeassistant",
         .credentials.username = "mqtt",
         .credentials.authentication.password = "12345",
     };
@@ -165,6 +165,8 @@ void app_main(void)
      * examples/protocols/README.md for more information about this function.
      */
     ESP_ERROR_CHECK(example_connect());
+
+    // xTaskCreate(telnet_server_task, "telnet_server", 4096, NULL, 5, NULL);
 
     mqtt_app_start();
 
