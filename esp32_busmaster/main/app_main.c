@@ -24,6 +24,7 @@
 #include "rs485_uart.h"
 #include "bus_master.h"
 #include "telnet_server.h"
+#include "webserver.h"
 
 static const char *TAG = "mqtt_example";
 
@@ -170,6 +171,7 @@ void app_main(void)
     xTaskCreate(telnet_server_task, "telnet_server", 4096, NULL, 5, NULL);
 
     mqtt_app_start();
+    start_webserver();
 
     while (1)
     {
