@@ -1,15 +1,16 @@
 dependencies:
   idf:
-    component_hash: null
     source:
       type: idf
-    version: 5.4.0
+    version: 5.5.0
   protocol_examples_common:
-    component_hash: null
+    dependencies: []
     source:
-      path: /home/tixiv/.platformio/packages/framework-espidf/examples/common_components/protocol_examples_common
+      path: /home/tixiv/repos/esp-idf/examples/common_components/protocol_examples_common
       type: local
     version: '*'
-manifest_hash: de5d89b2375e70eb1de454e87ca4d62fabb523879bc3a45cdce009af9ccd5686
+direct_dependencies:
+- protocol_examples_common
+manifest_hash: e213eefd9eb0cbc4f815bcf6aad46802487ab9c0e1d125afe3b8777b4bd72ae5
 target: esp32
-version: 1.0.0
+version: 2.0.0

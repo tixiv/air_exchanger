@@ -23,6 +23,7 @@
 
 #include "rs485_uart.h"
 #include "bus_master.h"
+#include "telnet_server.h"
 
 static const char *TAG = "mqtt_example";
 
@@ -166,7 +167,7 @@ void app_main(void)
      */
     ESP_ERROR_CHECK(example_connect());
 
-    // xTaskCreate(telnet_server_task, "telnet_server", 4096, NULL, 5, NULL);
+    xTaskCreate(telnet_server_task, "telnet_server", 4096, NULL, 5, NULL);
 
     mqtt_app_start();
 

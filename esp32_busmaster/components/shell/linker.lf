@@ -1,0 +1,13 @@
+[sections:cmd_tbl]
+entries:
+    .cmd_tbl+
+
+[scheme:cmd_tbl_default]
+entries:
+    cmd_tbl -> flash_rodata
+
+[mapping:cmd_tbl]
+archive: *
+entries:
+    * (cmd_tbl_default);
+        cmd_tbl -> flash_rodata KEEP() SORT(name) SURROUND(cmd_tbl)
