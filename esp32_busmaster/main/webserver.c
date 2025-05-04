@@ -1,22 +1,23 @@
 
-#include <esp_http_server.h>
-#include <esp_log.h>
 #include "webserver.h"
 
+#include <esp_http_server.h>
+#include <esp_log.h>
+#include <esp_spiffs.h>
 
-static const char *html_page = 
-"<!DOCTYPE html><html><body>"
-"<h2>Fan Control</h2>"
-"<label for='fan1'>Fan Speed:</label>"
-"<input type='range' min='0' max='100' value='50' id='fan1' oninput='updateFan(this.value)'>"
-"<p>Speed: <span id='speed'>50</span>%</p>"
-"<script>"
-"function updateFan(val) {"
-"  document.getElementById('speed').innerText = val;"
-"  fetch('/set_fan_speed?val=' + val);"
-"}"
-"</script>"
-"</body></html>";
+static const char *html_page =
+    "<!DOCTYPE html><html><body>"
+    "<h2>Fan Control</h2>"
+    "<label for='fan1'>Fan Speed:</label>"
+    "<input type='range' min='0' max='100' value='50' id='fan1' oninput='updateFan(this.value)'>"
+    "<p>Speed: <span id='speed'>50</span>%</p>"
+    "<script>"
+    "function updateFan(val) {"
+    "  document.getElementById('speed').innerText = val;"
+    "  fetch('/set_fan_speed?val=' + val);"
+    "}"
+    "</script>"
+    "</body></html>";
 
 esp_err_t index_handler(httpd_req_t *req)
 {
@@ -29,9 +30,11 @@ esp_err_t fan_speed_handler(httpd_req_t *req)
     char buf[32];
     int len = httpd_req_get_url_query_len(req) + 1;
 
-    if (len > 1 && httpd_req_get_url_query_str(req, buf, len) == ESP_OK) {
+    if (len > 1 && httpd_req_get_url_query_str(req, buf, len) == ESP_OK)
+    {
         char param[8];
-        if (httpd_query_key_value(buf, "val", param, sizeof(param)) == ESP_OK) {
+        if (httpd_query_key_value(buf, "val", param, sizeof(param)) == ESP_OK)
+        {
             int speed = atoi(param);
             ESP_LOGI("FAN", "Set fan speed to %d%%", speed);
             // TODO: Call fan control function here
@@ -42,26 +45,106 @@ esp_err_t fan_speed_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
+esp_err_t spiffs_handler(httpd_req_t *req)
+{
+    char filepath[64];
+    snprintf(filepath, sizeof(filepath), "/spiffs%.50s", req->uri);
+
+    printf("spiffs_handler: uri = \"%s\"\n", req->uri);
+    printf("spiffs_handler: filePath = \"%s\"\n", filepath);
+
+    FILE *file = fopen(filepath, "r");
+    if (!file)
+    {
+        printf("Couldn't open file\n");
+        httpd_resp_send_404(req);
+        return ESP_FAIL;
+    }
+
+    char chunk[512];
+    size_t read_bytes;
+    while ((read_bytes = fread(chunk, 1, sizeof(chunk), file)) > 0)
+    {
+        httpd_resp_send_chunk(req, chunk, read_bytes);
+    }
+
+    fclose(file);
+    httpd_resp_send_chunk(req, NULL, 0); // End response
+    return ESP_OK;
+}
+
+const char *TAG = "webserver";
+
+esp_err_t init_fs(void)
+{
+    esp_vfs_spiffs_conf_t conf = {
+        .base_path = "/spiffs",
+        .partition_label = NULL,
+        .max_files = 5,
+        .format_if_mount_failed = false};
+    esp_err_t ret = esp_vfs_spiffs_register(&conf);
+
+    if (ret != ESP_OK)
+    {
+        if (ret == ESP_FAIL)
+        {
+            ESP_LOGE(TAG, "Failed to mount or format filesystem");
+        }
+        else if (ret == ESP_ERR_NOT_FOUND)
+        {
+            ESP_LOGE(TAG, "Failed to find SPIFFS partition");
+        }
+        else
+        {
+            ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
+        }
+        return ESP_FAIL;
+    }
+
+    size_t total = 0, used = 0;
+    ret = esp_spiffs_info(NULL, &total, &used);
+    if (ret != ESP_OK)
+    {
+        ESP_LOGE(TAG, "Failed to get SPIFFS partition information (%s)", esp_err_to_name(ret));
+    }
+    else
+    {
+        ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
+    }
+    return ESP_OK;
+}
+
 void start_webserver(void)
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    config.uri_match_fn = httpd_uri_match_wildcard;
 
     httpd_handle_t server = NULL;
-    if (httpd_start(&server, &config) == ESP_OK) {
+    if (httpd_start(&server, &config) == ESP_OK)
+    {
         httpd_uri_t index_uri = {
-            .uri      = "/",
-            .method   = HTTP_GET,
-            .handler  = index_handler,
-            .user_ctx = NULL
-        };
+            .uri = "/",
+            .method = HTTP_GET,
+            .handler = index_handler,
+            .user_ctx = NULL};
         httpd_register_uri_handler(server, &index_uri);
 
         httpd_uri_t fan_uri = {
-            .uri      = "/set_fan_speed",
-            .method   = HTTP_GET,
-            .handler  = fan_speed_handler,
-            .user_ctx = NULL
-        };
+            .uri = "/set_fan_speed",
+            .method = HTTP_GET,
+            .handler = fan_speed_handler,
+            .user_ctx = NULL};
         httpd_register_uri_handler(server, &fan_uri);
+
+        if (init_fs() == ESP_OK)
+        {
+            httpd_uri_t common_get_uri = {
+                .uri = "/*",
+                .method = HTTP_GET,
+                .handler = spiffs_handler,
+                .user_ctx = NULL
+            };
+            httpd_register_uri_handler(server, &common_get_uri);
+        }
     }
 }
