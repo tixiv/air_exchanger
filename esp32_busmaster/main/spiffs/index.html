@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fan Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .slider {
+            width: 100%;
+        }
+
+        .output {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
+        .temperature {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Fan Control</h1>
+        <label for="fanSpeedSlider">Fan Speed: </label>
+        <input type="range" id="fanSpeedSlider" class="slider" min="0" max="100" value="50">
+        <p id="fanSpeedValue">Fan Speed: 50%</p>
+
+        <div class="temperature">
+            <p>Temperature: <span id="temperatureValue">--</span>°C</p>
+        </div>
+
+        <button onclick="getTemperature()">Get Current Temperature</button>
+    </div>
+
+    <script>
+        // Function to get the current fan speed from the ESP32
+        function updateStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('fanSpeedSlider').value = data.fan_speed;
+                    document.getElementById('fanSpeedValue').textContent = `Fan Speed: ${data.fan_speed}%`;
+                    document.getElementById('temperatureValue').textContent = `${data.temperature} °C`;
+                    document.getElementById('humidityValue').textContent = `${data.humidity} %`;
+                })
+                .catch(err => console.error("Failed to fetch status:", err));
+        }
+
+
+        // Listen to slider change and send value to ESP32
+        document.getElementById('fanSpeedSlider').addEventListener('input', function () {
+            let fanSpeed = this.value;
+            document.getElementById('fanSpeedValue').textContent = "Fan Speed: " + fanSpeed + "%";
+
+            // Optionally, send the new fan speed to the backend
+            fetch(`/set_fan_speed?value=${fanSpeed}`, { method: 'GET' })
+                .catch(error => console.error('Error setting fan speed:', error));
+        });
+
+        // On page load, get the initial fan speed and temperature
+        window.onload = function () {
+            updateStatus();
+        };
+        // Call every 5 seconds
+        setInterval(updateStatus, 5000);
+
+        const evtSource = new EventSource("/events");
+
+        evtSource.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+            document.getElementById('temperatureValue').textContent = `${data.temperature} °C`;
+        };
+
+        evtSource.onerror = function (err) {
+            console.error("EventSource failed:", err);
+        };
+
+    </script>
+</body>
+
+</html>

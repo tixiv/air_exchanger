@@ -16,7 +16,9 @@
 #include "nvs_flash.h"
 #include "esp_event.h"
 #include "esp_netif.h"
+#include "esp_wifi.h"
 #include "protocol_examples_common.h"
+#include "mdns.h"
 
 #include "esp_log.h"
 #include "mqtt_client.h"
@@ -25,6 +27,7 @@
 #include "bus_master.h"
 #include "telnet_server.h"
 #include "webserver.h"
+#include "wifi_connect.h"
 
 static const char *TAG = "mqtt_example";
 
@@ -141,6 +144,14 @@ static void mqtt_app_start(void)
     esp_mqtt_client_start(client);
 }
 
+static void my_mdns_init(void)
+{
+    ESP_ERROR_CHECK(mdns_init());
+    ESP_ERROR_CHECK(mdns_hostname_set("esp32-device"));
+    ESP_ERROR_CHECK(mdns_service_add("esp32-service", "_http", "_tcp", 80, NULL, 0));
+
+    ESP_LOGI("mDNS", "mDNS service started");
+}
 
 void app_main(void)
 {
@@ -167,6 +178,15 @@ void app_main(void)
      * examples/protocols/README.md for more information about this function.
      */
     ESP_ERROR_CHECK(example_connect());
+
+    //wifi_connect();
+
+
+    // After Wi-Fi connects:
+    my_mdns_init();
+    mdns_hostname_set("my-esp32");
+    mdns_instance_name_set("My ESP32 Web Interface");
+    
 
     xTaskCreate(telnet_server_task, "telnet_server", 4096, NULL, 5, NULL);
 
