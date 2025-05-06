@@ -18,10 +18,10 @@
 #include "esp_netif.h"
 #include "esp_wifi.h"
 #include "protocol_examples_common.h"
-#include "mdns.h"
-
 #include "esp_log.h"
+#include "driver/gpio.h"
 #include "mqtt_client.h"
+#include "mdns.h"
 
 #include "rs485_uart.h"
 #include "bus_master.h"
@@ -38,6 +38,24 @@ static void log_error_if_nonzero(const char *message, int error_code)
         ESP_LOGE(TAG, "Last error %s: 0x%x", message, error_code);
     }
 }
+
+#define RESET_BUTTON_GPIO 0
+
+void check_reset_button() {
+    gpio_config_t io_conf = {
+        .pin_bit_mask = 1ULL << RESET_BUTTON_GPIO,
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+    };
+    gpio_config(&io_conf);
+
+    if (gpio_get_level(RESET_BUTTON_GPIO) == 0) {
+        ESP_LOGW("RESET", "Reset button held down, clearing credentials...");
+        clear_wifi_credentials();
+        esp_restart();
+    }
+}
+
 
 /*
  * @brief Event handler registered to receive MQTT events
@@ -173,24 +191,34 @@ void app_main(void)
 
     rs485_uart_init();
 
-    /* This helper function configures Wi-Fi or Ethernet, as selected in menuconfig.
-     * Read "Establishing Wi-Fi or Ethernet Connection" section in
-     * examples/protocols/README.md for more information about this function.
-     */
-    ESP_ERROR_CHECK(example_connect());
 
-    //wifi_connect();
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ESP_ERROR_CHECK(nvs_flash_init());
+    }
 
+    check_reset_button();  // Optional: wipe config if button is pressed
+
+    char ssid[32] = {0};
+    char pass[64] = {0};
+    if (load_wifi_credentials(ssid, sizeof(ssid), pass, sizeof(pass))) {
+        ESP_LOGI("WiFi", "Found saved credentials, connecting to %s...", ssid);
+        
+        start_wifi_sta(ssid, pass);
+        // ESP_ERROR_CHECK(example_connect());
+
+        mqtt_app_start();
+    } else {
+        ESP_LOGW("WiFi", "No saved credentials, starting in AP mode");
+        wifi_init_ap_sta();
+    }
 
     // After Wi-Fi connects:
-    my_mdns_init();
-    mdns_hostname_set("my-esp32");
-    mdns_instance_name_set("My ESP32 Web Interface");
+    // my_mdns_init();
     
-
     xTaskCreate(telnet_server_task, "telnet_server", 4096, NULL, 5, NULL);
 
-    mqtt_app_start();
     start_webserver();
 
     while (1)
