@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fan Control</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .slider {
+            width: 100%;
+        }
+
+        .output {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+
+        .temperature {
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="bundle.js"></script>
+    <div class="container">
+        <h1>Fan Control</h1>
+        <label for="fanSpeedSlider">Fan Speed: </label>
+        <input type="range" id="fanSpeedSlider" class="slider" min="0" max="100" value="50">
+        <p id="fanSpeedValue">Fan Speed: 50%</p>
+
+        <div class="temperature">
+            <p>Temperature: <span id="temperatureValue">--</span>°C</p>
+        </div>
+
+        <button onclick="getTemperature()">Get Current Temperature</button>
+    </div>
+</body>
+
+</html>

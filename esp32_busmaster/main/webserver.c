@@ -2,10 +2,10 @@
 #include "webserver.h"
 
 #include "wifi_connect.h"
+#include "webserver_spiffs.h"
 
 #include <esp_http_server.h>
 #include <esp_log.h>
-#include <esp_spiffs.h>
 #include <esp_wifi.h>
 #include "cJSON.h"
 
@@ -46,34 +46,6 @@ esp_err_t fan_speed_handler(httpd_req_t *req)
     }
 
     httpd_resp_send(req, NULL, 0);
-    return ESP_OK;
-}
-
-esp_err_t spiffs_handler(httpd_req_t *req)
-{
-    char filepath[64];
-    snprintf(filepath, sizeof(filepath), "/spiffs%.50s", req->uri);
-
-    printf("spiffs_handler: uri = \"%s\"\n", req->uri);
-    printf("spiffs_handler: filePath = \"%s\"\n", filepath);
-
-    FILE *file = fopen(filepath, "r");
-    if (!file)
-    {
-        printf("Couldn't open file\n");
-        httpd_resp_send_404(req);
-        return ESP_FAIL;
-    }
-
-    char chunk[512];
-    size_t read_bytes;
-    while ((read_bytes = fread(chunk, 1, sizeof(chunk), file)) > 0)
-    {
-        httpd_resp_send_chunk(req, chunk, read_bytes);
-    }
-
-    fclose(file);
-    httpd_resp_send_chunk(req, NULL, 0); // End response
     return ESP_OK;
 }
 
@@ -211,45 +183,6 @@ esp_err_t connect_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-esp_err_t init_fs(void)
-{
-    esp_vfs_spiffs_conf_t conf = {
-        .base_path = "/spiffs",
-        .partition_label = NULL,
-        .max_files = 5,
-        .format_if_mount_failed = false};
-    esp_err_t ret = esp_vfs_spiffs_register(&conf);
-
-    if (ret != ESP_OK)
-    {
-        if (ret == ESP_FAIL)
-        {
-            ESP_LOGE(TAG, "Failed to mount or format filesystem");
-        }
-        else if (ret == ESP_ERR_NOT_FOUND)
-        {
-            ESP_LOGE(TAG, "Failed to find SPIFFS partition");
-        }
-        else
-        {
-            ESP_LOGE(TAG, "Failed to initialize SPIFFS (%s)", esp_err_to_name(ret));
-        }
-        return ESP_FAIL;
-    }
-
-    size_t total = 0, used = 0;
-    ret = esp_spiffs_info(NULL, &total, &used);
-    if (ret != ESP_OK)
-    {
-        ESP_LOGE(TAG, "Failed to get SPIFFS partition information (%s)", esp_err_to_name(ret));
-    }
-    else
-    {
-        ESP_LOGI(TAG, "Partition size: total: %d, used: %d", total, used);
-    }
-    return ESP_OK;
-}
-
 void start_webserver(void)
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
@@ -302,12 +235,12 @@ void start_webserver(void)
         };
         httpd_register_uri_handler(server, &connect_uri);        
 
-        if (init_fs() == ESP_OK)
+        if (spiffs_init_fs() == ESP_OK)
         {
             httpd_uri_t common_get_uri = {
                 .uri = "/*",
                 .method = HTTP_GET,
-                .handler = spiffs_handler,
+                .handler = spiffs_get_handler,
                 .user_ctx = NULL
             };
             httpd_register_uri_handler(server, &common_get_uri);
