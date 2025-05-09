@@ -1,4 +1,6 @@
 
+import './styles.css';
+
 import { loadNavbar } from './common';
 
 window.addEventListener('DOMContentLoaded', async () => {

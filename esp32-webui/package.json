@@ -14,6 +14,7 @@
   "devDependencies": {
     "copy-webpack-plugin": "^13.0.0",
     "css-loader": "^7.1.2",
+    "daisyui": "^5.0.35",
     "fs-extra": "^11.3.0",
     "glob": "^11.0.2",
     "gzipper": "^8.2.1",
@@ -25,12 +26,14 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.5",
     "acorn": "^8.14.1",
     "ajv": "^8.17.1",
     "ajv-formats": "^2.1.1",
     "ajv-keywords": "^5.1.0",
     "ansi-regex": "^5.0.1",
     "ansi-styles": "^4.3.0",
+    "autoprefixer": "^10.4.21",
     "balanced-match": "^1.0.2",
     "base64-js": "^1.5.1",
     "boolbase": "^1.0.0",
@@ -140,6 +143,7 @@
     "picomatch": "^2.3.1",
     "pkg-dir": "^4.2.0",
     "postcss": "^8.5.3",
+    "postcss-loader": "^8.1.1",
     "postcss-modules-extract-imports": "^3.1.0",
     "postcss-modules-local-by-default": "^4.2.0",
     "postcss-modules-scope": "^3.2.1",
@@ -178,6 +182,7 @@
     "strip-ansi-cjs": "^6.0.1",
     "supports-color": "^7.2.0",
     "supports-preserve-symlinks-flag": "^1.0.0",
+    "tailwindcss": "^4.1.5",
     "tapable": "^2.2.1",
     "terser": "^5.39.0",
     "terser-webpack-plugin": "^5.3.14",

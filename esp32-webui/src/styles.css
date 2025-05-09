@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@plugin "daisyui";
+@custom-variant dark (&:where(.dark, .dark *));
+
+.navbar {
+    display: flex;
+    background-color: #2c3e50;
+    padding: 0.5rem;
+}
+
+.navbar .tab {
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    margin-right: 1rem;
+    border-radius: 4px;
+}
+
+.navbar .tab:hover {
+    background-color: #34495e;
+}
+
+.navbar .tab.active {
+    background-color: #1abc9c;
+}

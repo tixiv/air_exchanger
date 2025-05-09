@@ -23,8 +23,12 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                use: ['style-loader', 'css-loader'],
-            }
+                use: [
+                    'style-loader',       // Inject CSS into DOM
+                    'css-loader',         // Process CSS files
+                    'postcss-loader',     // Use PostCSS to process Tailwind and Autoprefixer
+                ],
+            },
         ]
     },
     resolve: {
@@ -34,12 +38,12 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: 'src/index.html',
             filename: 'index.html',
-            chunks: ['index'],
+            chunks: ['index', 'common'],
         }),
         new HtmlWebpackPlugin({
             template: 'src/wifi_setup.html',
             filename: 'wifi_setup.html',
-            chunks: ['wifi_setup'],
+            chunks: ['wifi_setup', 'common'],
         }),
         new CopyPlugin({
             patterns: [

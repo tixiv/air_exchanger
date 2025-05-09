@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark", data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <title>Wi-Fi Setup</title>
@@ -11,7 +12,9 @@
             padding: 2rem;
         }
 
-        label, select, input {
+        label,
+        select,
+        input {
             display: block;
             margin-bottom: 1rem;
             width: 100%;
@@ -23,17 +26,19 @@
         }
     </style>
 </head>
+
 <body>
     <div id="navbar"></div>
     <h2>Connect to Wi-Fi</h2>
     <form id="wifiForm">
-        <label for="ssid">Available Networks:</label>
-        <select id="ssid" name="ssid" required></select>
+        <select class="select" id="ssid" name="ssid" required>
+            <option disabled selected>Select Wifi Network</option>
+        </select>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" placeholder="Enter password" required>
+        <label class="label" for="password">Password:</label>
+        <input class="input" type="password" id="password" name="password" placeholder="Enter password" required>
 
-        <button type="submit">Connect</button>
+        <button class="btn btn-primary" type="submit">Connect</button>
     </form>
 
     <p id="status"></p>
@@ -67,14 +72,15 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ssid, password })
             })
-            .then(res => res.text())
-            .then(msg => {
-                document.getElementById('status').textContent = msg;
-            })
-            .catch(err => {
-                document.getElementById('status').textContent = "Failed to send credentials.";
-            });
+                .then(res => res.text())
+                .then(msg => {
+                    document.getElementById('status').textContent = msg;
+                })
+                .catch(err => {
+                    document.getElementById('status').textContent = "Failed to send credentials.";
+                });
         });
     </script>
 </body>
+
 </html>
