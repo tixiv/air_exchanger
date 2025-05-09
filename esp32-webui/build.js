@@ -25,8 +25,8 @@ glob(`${distDir}/**/*.*`).then(async (files) => {
 
     try {
       await fs.ensureDir(path.dirname(destPath));
-      await fs.copy(file, destPath);
-      console.log(`Copied: ${relPath}`);
+      //await fs.copy(file, destPath);
+      //console.log(`Copied: ${relPath}`);
 
       const gzDest = destPath + '.gz';
       await gzipFile(file, gzDest);

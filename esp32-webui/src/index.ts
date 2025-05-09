@@ -1,3 +1,11 @@
+
+import { loadNavbar } from './common';
+
+window.addEventListener('DOMContentLoaded', async () => {
+  await loadNavbar();  // Shared function to load navbar and set active tab
+});
+
+
 // Define the structure of the data returned from the /status endpoint
 interface StatusData {
     fan_speed: number;
@@ -18,7 +26,7 @@ function updateStatus(): void {
             if (fanSpeedSlider && fanSpeedValue && temperatureValue && humidityValue) {
                 fanSpeedSlider.value = data.fan_speed.toString();
                 fanSpeedValue.textContent = `Fan Speed: ${data.fan_speed}%`;
-                temperatureValue.textContent = `Barfoo ${data.temperature}`;
+                temperatureValue.textContent = `${data.temperature}`;
                 humidityValue.textContent = `${data.humidity} %`;
             }
         })
@@ -58,7 +66,7 @@ evtSource.onmessage = function (event: MessageEvent) {
     const temperatureValue = document.getElementById('temperatureValue') as HTMLSpanElement;
 
     if (temperatureValue) {
-        temperatureValue.textContent = `${data.temperature} °C`;
+        temperatureValue.textContent = `${data.temperature}`;
     }
 };
 

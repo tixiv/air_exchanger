@@ -12,6 +12,7 @@
   "author": "Tixiv",
   "license": "MIT",
   "devDependencies": {
+    "copy-webpack-plugin": "^13.0.0",
     "css-loader": "^7.1.2",
     "fs-extra": "^11.3.0",
     "glob": "^11.0.2",

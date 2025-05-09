@@ -1,14 +1,18 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const path = require('path');
 
 module.exports = {
     mode: 'production',
-    entry: './src/index.ts',
     cache: false,
+    entry: {
+        index: './src/index.ts',
+        wifi_setup: './src/wifi_setup.ts',
+    },
     output: {
-        filename: 'bundle.js',
+        filename: '[name].bundle.js',
         path: path.resolve(__dirname, 'dist'),
-        clean: true
+        clean: true,
     },
     module: {
         rules: [
@@ -28,7 +32,19 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: './src/index.html'
+            template: 'src/index.html',
+            filename: 'index.html',
+            chunks: ['index'],
+        }),
+        new HtmlWebpackPlugin({
+            template: 'src/wifi_setup.html',
+            filename: 'wifi_setup.html',
+            chunks: ['wifi_setup'],
+        }),
+        new CopyPlugin({
+            patterns: [
+                { from: 'src/nav.html', to: 'nav.html' }
+            ]
         })
     ]
 };
