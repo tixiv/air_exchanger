@@ -1,28 +1,32 @@
 <!DOCTYPE html>
-<html lang="en" class="dark", data-theme="dark">
+<html lang="en" class="dark" , data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wi-Fi Setup</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 400px;
-            margin: auto;
-            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            /* Makes all child elements stack vertically */
+            align-items: center;
+            /* Centers items horizontally */
+            padding: 20px;
+            /* Optional: Adds some spacing around the content */
         }
 
-        label,
-        select,
-        input {
-            display: block;
-            margin-bottom: 1rem;
-            width: 100%;
+        form {
+            display: flex;
+            flex-direction: column;
+            /* Stack form elements vertically */
+            gap: 10px;
+            /* Adds spacing between form elements */
         }
 
-        button {
-            padding: 0.5rem;
-            width: 100%;
+        #status {
+            margin-top: 20px;
+            /* Adds space between status and the form */
         }
     </style>
 </head>
@@ -42,45 +46,6 @@
     </form>
 
     <p id="status"></p>
-
-    <script>
-        // Fetch available networks
-        fetch('/scan')
-            .then(response => response.json())
-            .then(data => {
-                const ssidSelect = document.getElementById('ssid');
-                data.forEach(ap => {
-                    const option = document.createElement('option');
-                    option.value = ap.ssid;
-                    option.text = `${ap.ssid} (${ap.rssi} dBm)`;
-                    ssidSelect.appendChild(option);
-                });
-            })
-            .catch(err => {
-                console.error("Failed to load Wi-Fi list:", err);
-                document.getElementById('status').textContent = "Error loading networks.";
-            });
-
-        // Handle form submit
-        document.getElementById('wifiForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const ssid = document.getElementById('ssid').value;
-            const password = document.getElementById('password').value;
-
-            fetch('/connect', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ssid, password })
-            })
-                .then(res => res.text())
-                .then(msg => {
-                    document.getElementById('status').textContent = msg;
-                })
-                .catch(err => {
-                    document.getElementById('status').textContent = "Failed to send credentials.";
-                });
-        });
-    </script>
 </body>
 
 </html>
