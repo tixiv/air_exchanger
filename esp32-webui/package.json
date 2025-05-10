@@ -52,6 +52,7 @@
     "colorette": "^2.0.20",
     "commander": "^8.3.0",
     "core-util-is": "^1.0.3",
+    "cors": "^2.8.5",
     "cross-spawn": "^7.0.6",
     "css-select": "^4.3.0",
     "css-what": "^6.1.0",
