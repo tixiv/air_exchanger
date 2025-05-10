@@ -23,15 +23,16 @@ let fanSpeed1 = 66;
 let fanSpeed2 = 55;
 
 // Mock /set_fan_speed endpoints
-app.get('/set_fan_speed/1', (req, res) => {
-    fanSpeed1 = req.query.value;
-    console.log(`Fan speed 1 set to: ${fanSpeed1}`);
-    res.sendStatus(200);
-});
-
-app.get('/set_fan_speed/2', (req, res) => {
-    fanSpeed2 = req.query.value;
-    console.log(`Fan speed 2 set to: ${fanSpeed2}`);
+app.get('/set_fan_speed', (req, res) => {
+    var speed = req.query.value;
+    var fan = req.query.fan;
+    if (fan == 1) {
+        fanSpeed1 = speed;
+    }
+    if (fan == 2) {
+        fanSpeed2 = speed;
+    }
+    console.log(`Fan speed ${fan} set to: ${speed}`);
     res.sendStatus(200);
 });
 

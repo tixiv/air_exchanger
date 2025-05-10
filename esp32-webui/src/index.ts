@@ -22,7 +22,7 @@ function setFanSpeed(fan: number, speed: number, transmit: boolean, setSlider: b
     }
 
     if (transmit) {
-        fetch(`/set_fan_speed/${fan}?value=${speed}`, { method: 'GET' })
+        fetch(`/set_fan_speed?fan=${fan}&value=${speed}`, { method: 'GET' })
             .catch((error) => console.error('Error setting fan speed:', error));
     }
 

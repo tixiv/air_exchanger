@@ -4,6 +4,11 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
+#include "cJSON.h"
+#include "ui_values.h"
+
+
+struct UI_values ui_values;
 
 #define MAX_CLIENTS 5
 
@@ -21,19 +26,36 @@ static void add_client(int fd) {
     xSemaphoreGive(client_mutex);
 }
 
-void createMessage(char *msg)
+const char *createMessage()
 {
-    float temp = 25.0; // Replace with actual sensor data
-    snprintf(msg, 128, "data: { \"temperature\": %.2f }\n\n", temp);
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "fan_speed1", ui_values.fan_speed1);
+    cJSON_AddNumberToObject(root, "fan_speed2", ui_values.fan_speed2);
+    cJSON_AddNumberToObject(root, "temperature1", 12.5);
+    cJSON_AddNumberToObject(root, "temperature2", 13.5);
+    cJSON_AddNumberToObject(root, "temperature3", 14.5);
+    cJSON_AddNumberToObject(root, "temperature4", 15.5);
+
+    const char *json_str = cJSON_PrintUnformatted(root);
+    cJSON_Delete(root);
+
+    int alloc_size = strlen(json_str) + 10;
+    char *sse_str = malloc(alloc_size);
+    snprintf(sse_str, alloc_size, "data: %s\n\n", json_str);
+    
+    free((void*)json_str);
+
+    return sse_str;
 }
 
 static void sse_broadcast_task(void *param) {
-    char msg[128];
-    char buf[168];
+    char buf[256];
 
     while (1) {
-        createMessage(msg);
-        snprintf(buf, sizeof(buf), "%x\r\n%s\r\n", strlen(msg), msg);
+        const char * sse_str = createMessage();
+
+        snprintf(buf, sizeof(buf), "%x\r\n%s\r\n", strlen(sse_str), sse_str);
+        free((void *)sse_str);
 
         xSemaphoreTake(client_mutex, portMAX_DELAY);
         for (int i = 0; i < MAX_CLIENTS; i++) {
@@ -65,11 +87,10 @@ esp_err_t sse_handler(httpd_req_t *req) {
     httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
     httpd_resp_set_hdr(req, "Connection", "keep-alive");
 
-    char msg[128];
-    createMessage(msg);
+    const char * json_str = createMessage();
+    httpd_resp_send_chunk(req, json_str, strlen(json_str));
 
-    httpd_resp_send_chunk(req, msg, strlen(msg));
-    // httpd_resp_send_chunk(req, NULL, 0); // flush headers
+    free((void *)json_str);
 
     int fd = httpd_req_to_sockfd(req);
     add_client(fd);
