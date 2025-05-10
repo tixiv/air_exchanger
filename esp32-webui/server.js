@@ -19,32 +19,46 @@ app.use(express.static(path.join(__dirname, 'dist'), {
     }
 }));
 
-// Mock /status endpoint
-app.get('/status', (req, res) => {
-    res.json({
-        fan_speed: 50,
-        temperature: 23.5,
-        humidity: 60
-    });
-});
+let fanSpeed1 = 66;
+let fanSpeed2 = 55;
 
-// Mock /set_fan_speed endpoint
-app.get('/set_fan_speed', (req, res) => {
-    const fanSpeed = req.query.value;
-    console.log(`Fan speed set to: ${fanSpeed}`);
+// Mock /set_fan_speed endpoints
+app.get('/set_fan_speed/1', (req, res) => {
+    fanSpeed1 = req.query.value;
+    console.log(`Fan speed 1 set to: ${fanSpeed1}`);
     res.sendStatus(200);
 });
 
-// Mock EventSource (just sends temperature updates every 5 seconds)
+app.get('/set_fan_speed/2', (req, res) => {
+    fanSpeed2 = req.query.value;
+    console.log(`Fan speed 2 set to: ${fanSpeed2}`);
+    res.sendStatus(200);
+});
+
 app.get('/events', (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders();
+    res.flushHeaders(); // flush the headers to establish SSE
 
-    setInterval(() => {
-        res.write(`data: {"temperature": ${Math.random() * 30}}\n\n`);
-    }, 5000);
+    const interval = setInterval(() => {
+        const data = {
+            fan_speed1: fanSpeed1,
+            fan_speed2: fanSpeed2,
+            temperature1: Math.random() * 60,
+            temperature2: Math.random() * 30,
+            temperature3: Math.random() * 30,
+            temperature4: Math.random() * 30,
+        };
+
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+    }, 2000);
+
+    // Handle client disconnect
+    req.on('close', () => {
+        clearInterval(interval);
+        res.end();
+    });
 });
 
 // Mock data for available networks

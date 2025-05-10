@@ -1,51 +1,57 @@
 <!DOCTYPE html>
-<html lang="en", class="dark", data-theme="dark">
+<html lang="de" class="dark" data-theme="dark">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fan Control</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-
-        .container {
-            width: 80%;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .slider {
-            width: 100%;
-        }
-
-        .output {
-            font-size: 1.5em;
-            margin-top: 20px;
-        }
-
-        .temperature {
-            font-size: 1.5em;
-            margin-top: 20px;
-        }
-    </style>
 </head>
 
-<body>
-    <div id="navbar"></div>
-    <div class="container">
-        <h1>Fan Control</h1>
-        <label for="fanSpeedSlider">Fan Speed: </label>
-        <input type="range" id="fanSpeedSlider" class="slider" min="0" max="100" value="50">
-        <p id="fanSpeedValue">Fan Speed: 50%</p>
+<body class="min-h-screen bg-base-100 text-base-content">
+    <div id="navbar" class="mb-4"></div>
 
-        <div class="temperature">
-            <p>Temperature: <span id="temperatureValue">--</span>°C</p>
-        </div>
+    <main class="max-w-2xl mx-auto px-4 space-y-8">
+        <section class="card shadow-lg bg-base-200 p-6">
+            <h2 class="text-xl font-semibold mb-4">Lüftersteuerung</h2>
 
-        <button onclick="getTemperature()">Get Current Temperature</button>
-    </div>
+            <div class="space-y-4">
+                <div>
+                    <label for="fanSpeedSlider1" class="label">Innen → Außen</label>
+                    <input type="range" id="fanSpeedSlider1" class="range" min="0" max="100" />
+                    <p class="text-sm mt-1">Aktuell: <span id="fanSpeedValue1">--</span>%</p>
+                </div>
+
+                <div>
+                    <label for="fanSpeedSlider2" class="label">Außen → Innen</label>
+                    <input type="range" id="fanSpeedSlider2" class="range" min="0" max="100" />
+                    <p class="text-sm mt-1">Aktuell: <span id="fanSpeedValue2">--</span>%</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="card shadow-lg bg-base-200 p-6">
+            <h2 class="text-xl font-semibold mb-4">Temperaturen</h2>
+
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div class="stat bg-base-100 p-4 rounded-box">
+                    <div class="stat-title">Sensor 1</div>
+                    <div class="stat-value text-primary"><span id="temperatureValue1">--</span>°C</div>
+                </div>
+                <div class="stat bg-base-100 p-4 rounded-box">
+                    <div class="stat-title">Sensor 2</div>
+                    <div class="stat-value text-primary"><span id="temperatureValue2">--</span>°C</div>
+                </div>
+                <div class="stat bg-base-100 p-4 rounded-box">
+                    <div class="stat-title">Sensor 3</div>
+                    <div class="stat-value text-primary"><span id="temperatureValue3">--</span>°C</div>
+                </div>
+                <div class="stat bg-base-100 p-4 rounded-box">
+                    <div class="stat-title">Sensor 4</div>
+                    <div class="stat-value text-primary"><span id="temperatureValue4">--</span>°C</div>
+                </div>
+            </div>
+        </section>
+    </main>
 </body>
 
 </html>

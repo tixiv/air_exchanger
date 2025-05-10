@@ -1,75 +1,73 @@
 
-import './styles.css';
-
 import { loadNavbar } from './common';
 
 window.addEventListener('DOMContentLoaded', async () => {
-  await loadNavbar();  // Shared function to load navbar and set active tab
+    await loadNavbar();  // Shared function to load navbar and set active tab
 });
 
+function set_temperature(index: number, temperature: number)
+{
+    const htmlSpan = document.getElementById(`temperatureValue${index}`) as HTMLSpanElement;
 
-// Define the structure of the data returned from the /status endpoint
-interface StatusData {
-    fan_speed: number;
-    temperature: number;
-    humidity: number;
+    if (htmlSpan) {
+        htmlSpan.textContent = `${temperature}`;
+    }
 }
 
-// Function to get the current fan speed from the ESP32
-function updateStatus(): void {
-    fetch('/status')
-        .then((response) => response.json())
-        .then((data: StatusData) => {
-            const fanSpeedSlider = document.getElementById('fanSpeedSlider') as HTMLInputElement;
-            const fanSpeedValue = document.getElementById('fanSpeedValue') as HTMLSpanElement;
-            const temperatureValue = document.getElementById('temperatureValue') as HTMLSpanElement;
-            const humidityValue = document.getElementById('humidityValue') as HTMLSpanElement;
+function setFanSpeed(fan: number, speed: number, transmit: boolean, setSlider: boolean) {
+    const htmlSpan = document.getElementById(`fanSpeedValue${fan}`) as HTMLSpanElement;
 
-            if (fanSpeedSlider && fanSpeedValue && temperatureValue && humidityValue) {
-                fanSpeedSlider.value = data.fan_speed.toString();
-                fanSpeedValue.textContent = `Fan Speed: ${data.fan_speed}%`;
-                temperatureValue.textContent = `${data.temperature}`;
-                humidityValue.textContent = `${data.humidity} %`;
-            }
-        })
-        .catch((err) => console.error('Failed to fetch status:', err));
+    if (htmlSpan) {
+        htmlSpan.textContent = `${speed}`;
+    }
+
+    if (transmit) {
+        fetch(`/set_fan_speed/${fan}?value=${speed}`, { method: 'GET' })
+            .catch((error) => console.error('Error setting fan speed:', error));
+    }
+
+    if (setSlider)
+    {
+        const fanSpeedSlider = document.getElementById(`fanSpeedSlider${fan}`) as HTMLInputElement;
+        if (fanSpeedSlider)
+        {
+            fanSpeedSlider.value = speed.toString();
+        }
+    }
 }
 
 // Listen to slider change and send value to ESP32
-const fanSpeedSlider = document.getElementById('fanSpeedSlider') as HTMLInputElement;
-if (fanSpeedSlider) {
-    fanSpeedSlider.addEventListener('input', function () {
-        const fanSpeed = this.value;
-        const fanSpeedValue = document.getElementById('fanSpeedValue') as HTMLSpanElement;
-
-        if (fanSpeedValue) {
-            fanSpeedValue.textContent = `Fan Speed: ${fanSpeed}%`;
-        }
-
-        // Optionally, send the new fan speed to the backend
-        fetch(`/set_fan_speed?value=${fanSpeed}`, { method: 'GET' })
-            .catch((error) => console.error('Error setting fan speed:', error));
-    });
+for (let i = 1; i <= 2; i++) {
+    const fanSpeedSlider = document.getElementById(`fanSpeedSlider${i}`) as HTMLInputElement;
+    if (fanSpeedSlider) {
+        fanSpeedSlider.addEventListener('input', function () {
+            const fanSpeed = Number(this.value);
+            setFanSpeed(i, fanSpeed, true, false);
+        });
+    }
 }
 
-// On page load, get the initial fan speed and temperature
-window.onload = function () {
-    updateStatus();
-};
-
-// Call every 5 seconds
-setInterval(updateStatus, 5000);
+interface EventData {
+    fan_speed1: number;
+    fan_speed2: number;
+    temperature1: number;
+    temperature2: number;
+    temperature3: number;
+    temperature4: number;
+}
 
 // EventSource for receiving live updates
 const evtSource = new EventSource('/events');
 
 evtSource.onmessage = function (event: MessageEvent) {
-    const data = JSON.parse(event.data);
-    const temperatureValue = document.getElementById('temperatureValue') as HTMLSpanElement;
+    const data = JSON.parse(event.data) as EventData;
 
-    if (temperatureValue) {
-        temperatureValue.textContent = `${data.temperature}`;
-    }
+    setFanSpeed(1, data.fan_speed1, false, true);
+    setFanSpeed(2, data.fan_speed2, false, true);
+    set_temperature(1, data.temperature1);
+    set_temperature(2, data.temperature2);
+    set_temperature(3, data.temperature3);
+    set_temperature(4, data.temperature4);
 };
 
 evtSource.onerror = function (err) {

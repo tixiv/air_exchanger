@@ -1,51 +1,43 @@
 <!DOCTYPE html>
-<html lang="en" class="dark" , data-theme="dark">
+<html lang="en" class="dark" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wi-Fi Setup</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            /* Makes all child elements stack vertically */
-            align-items: center;
-            /* Centers items horizontally */
-            padding: 20px;
-            /* Optional: Adds some spacing around the content */
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            /* Stack form elements vertically */
-            gap: 10px;
-            /* Adds spacing between form elements */
-        }
-
-        #status {
-            margin-top: 20px;
-            /* Adds space between status and the form */
-        }
-    </style>
 </head>
 
 <body>
     <div id="navbar"></div>
-    <h2>Connect to Wi-Fi</h2>
-    <form id="wifiForm">
-        <select class="select" id="ssid" name="ssid" required>
-            <option disabled selected>Select Wifi Network</option>
-        </select>
 
-        <label class="label" for="password">Password:</label>
-        <input class="input" type="password" id="password" name="password" placeholder="Enter password" required>
+    <div class="w-full max-w-md mx-auto p-4">
+        <h2 class="text-2xl text-center mb-4">Connect to Wi-Fi</h2>
 
-        <button class="btn btn-primary" type="submit">Connect</button>
-    </form>
+        <form id="wifiForm" class="space-y-6">
+            <div class="form-control w-full">
+                <label for="ssid" class="label">
+                    <span class="label-text">Wi-Fi Network</span>
+                </label>
+                <select class="select select-bordered w-full" id="ssid" name="ssid" required>
+                    <option disabled selected>Select Wifi Network</option>
+                </select>
+            </div>
 
-    <p id="status"></p>
+            <div class="form-control w-full">
+                <label for="password" class="label">
+                    <span class="label-text">Password</span>
+                </label>
+                <input class="input input-bordered w-full" type="password" id="password" name="password"
+                    placeholder="Enter password" required>
+            </div>
+
+            <div class="text-center">
+                <button class="btn btn-primary w-full" type="submit">Connect</button>
+            </div>
+        </form>
+
+        <p id="status" class="text-center mt-4"></p>
+    </div>
 </body>
 
 </html>
