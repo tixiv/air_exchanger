@@ -1,5 +1,5 @@
 
-import './styles.css';
+import './styles.css'
 
 export async function loadNavbar() {
     const navbarContainer = document.getElementById('navbar');

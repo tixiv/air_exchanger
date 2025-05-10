@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
 module.exports = {
@@ -22,11 +23,11 @@ module.exports = {
                 exclude: /node_modules/
             },
             {
-                test: /\.css$/,
+                test: /\.css$/i,
                 use: [
-                    'style-loader',       // Inject CSS into DOM
-                    'css-loader',         // Process CSS files
-                    'postcss-loader',     // Use PostCSS to process Tailwind and Autoprefixer
+                    MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'postcss-loader',
                 ],
             },
         ]
@@ -50,6 +51,9 @@ module.exports = {
                 { from: 'src/nav.html', to: 'nav.html' },
                 { from: 'src/favicon.ico', to: 'favicon.ico' },
             ]
-        })
+        }),
+        new MiniCssExtractPlugin({
+            filename: 'styles.css',
+        }),
     ]
 };
