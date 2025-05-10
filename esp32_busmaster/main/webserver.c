@@ -3,6 +3,7 @@
 
 #include "wifi_connect.h"
 #include "webserver_spiffs.h"
+#include "webserver_sse.h"
 
 #include <esp_http_server.h>
 #include <esp_log.h>
@@ -69,27 +70,6 @@ esp_err_t get_status_handler(httpd_req_t *req) {
     cJSON_Delete(root);
     free((void *)json_str);
 
-    return ESP_OK;
-}
-
-esp_err_t sse_handler(httpd_req_t *req) {
-    httpd_resp_set_type(req, "text/event-stream");
-    httpd_resp_set_hdr(req, "Cache-Control", "no-cache");
-    httpd_resp_set_hdr(req, "Connection", "keep-alive");
-
-    while (1) {
-        char msg[64];
-        float temp = 12.5;
-        snprintf(msg, sizeof(msg), "data: { \"temperature\": %.2f }\n\n", temp);
-
-        if (httpd_resp_send_chunk(req, msg, strlen(msg)) != ESP_OK) {
-            break; // client disconnected
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(2000));  // send every 2 seconds
-    }
-
-    httpd_resp_send_chunk(req, NULL, 0); // close chunked response
     return ESP_OK;
 }
 
@@ -187,6 +167,9 @@ void start_webserver(void)
 {
     httpd_config_t config = HTTPD_DEFAULT_CONFIG();
     config.uri_match_fn = httpd_uri_match_wildcard;
+    config.max_open_sockets = 7;
+    config.stack_size = 8192;
+    config.lru_purge_enable = true;
 
     httpd_handle_t server = NULL;
     if (httpd_start(&server, &config) == ESP_OK)
@@ -211,6 +194,8 @@ void start_webserver(void)
             .handler = get_status_handler,
             .user_ctx = NULL};
         httpd_register_uri_handler(server, &get_status_uri);
+
+        sse_init();
 
         httpd_uri_t sse_uri = {
             .uri = "/events",

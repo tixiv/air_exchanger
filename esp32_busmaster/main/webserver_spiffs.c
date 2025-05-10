@@ -2,6 +2,7 @@
 #include "webserver_spiffs.h"
 #include <esp_spiffs.h>
 #include <esp_log.h>
+#include <errno.h>
 
 #define ESP_VFS_PATH_MAX 64
 
@@ -57,26 +58,39 @@ esp_err_t spiffs_get_handler(httpd_req_t *req) {
     }
 
     if (!file) {
-        httpd_resp_send_404(req);
+        ESP_LOGE(TAG, "File %s not found. errno=%d", filepath, errno);
+        ESP_ERROR_CHECK(httpd_resp_send_404(req));
         return ESP_FAIL;
     }
+
+    ESP_LOGI(TAG, "Opened file %s", filepath);
 
     // Guess content type
     const char *content_type = "text/plain";
     if (strstr(uri, ".html")) content_type = "text/html";
     else if (strstr(uri, ".css")) content_type = "text/css";
     else if (strstr(uri, ".js")) content_type = "application/javascript";
+    else if (strstr(uri, ".ico")) content_type = "image/x-icon";
 
-    httpd_resp_set_type(req, content_type);
+    ESP_ERROR_CHECK(httpd_resp_set_type(req, content_type));
 
     if (is_gzipped) {
-        httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
+        ESP_ERROR_CHECK(httpd_resp_set_hdr(req, "Content-Encoding", "gzip"));
     }
 
     char chunk[1024];
     size_t read_bytes;
     while ((read_bytes = fread(chunk, 1, sizeof(chunk), file)) > 0) {
-        httpd_resp_send_chunk(req, chunk, read_bytes);
+        if (httpd_resp_send_chunk(req, chunk, read_bytes) != ESP_OK)
+        {
+            ESP_LOGE(TAG, "httpd_resp_send_chunk failed.");
+            break;
+        }
+    }
+
+    if (read_bytes < 0)
+    {
+        ESP_LOGE(TAG, "Fread failed. errno=%d", errno);
     }
 
     fclose(file);
