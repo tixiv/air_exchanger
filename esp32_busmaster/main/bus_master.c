@@ -47,12 +47,22 @@ static void update_heater_rx_data()
 	}
 }
 
+static void update_mainboard_tx_data()
+{
+	mainboard_tx_data.power_flags = ui_values.power ? 1:0;
+}
+
 static void update_fan_tx_data()
 {
 	for (int i = 0; i < 2; i++)
 	{
-		fan_tx_data.fan_pwm[i] = ui_values.fan_speeds[i] * (1023.0f / 100.0f);
+		fan_tx_data.fan_pwm[i] = ui_values.power ? (ui_values.fan_speeds[i] * (1023.0f / 100.0f)) : 0;
 	}
+}
+
+static void update_heater_tx_data()
+{
+	heater_tx_data.heater_duty = ui_values.power ? ui_values.heater : 0;
 }
 
 uint8_t device_index;
@@ -92,14 +102,15 @@ void handle_bus_master()
 
 	if (timeout_counter == 0)
 	{
-		if (delay_count++ == 100)
+		if (delay_count++ == 10)
 		{
 			delay_count = 0;
-			timeout_counter = 255;
+			timeout_counter = 25;
 
 			switch (device_index)
 			{
 			case 0:
+				update_mainboard_tx_data();
 				rs485_transmit(2, 1, &mainboard_tx_data, sizeof(mainboard_tx_data));
 				break;
 			case 1:
@@ -107,6 +118,7 @@ void handle_bus_master()
 				rs485_transmit(4, 1, &fan_tx_data, sizeof(fan_tx_data));
 				break;
 			case 2:
+				update_heater_tx_data();
 				rs485_transmit(5, 1, &heater_tx_data, sizeof(heater_tx_data));
 				break;
 			}

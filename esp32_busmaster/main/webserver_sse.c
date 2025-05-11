@@ -32,6 +32,8 @@ static void add_client(int fd) {
 const char *createMessage()
 {
     cJSON *root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "power", ui_values.power ? 1:0);
+    cJSON_AddNumberToObject(root, "heater", ui_values.heater);
     cJSON_AddNumberToObject(root, "fan_speed1", ui_values.fan_speeds[0]);
     cJSON_AddNumberToObject(root, "fan_speed2", ui_values.fan_speeds[1]);
 

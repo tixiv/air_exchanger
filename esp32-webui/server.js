@@ -22,6 +22,10 @@ app.use(express.static(path.join(__dirname, 'dist'), {
 let fanSpeed1 = 66;
 let fanSpeed2 = 55;
 
+let power = 0;
+
+let heater = 33;
+
 // Mock /set_fan_speed endpoints
 app.get('/set_fan_speed', (req, res) => {
     var speed = req.query.value;
@@ -36,6 +40,18 @@ app.get('/set_fan_speed', (req, res) => {
     res.sendStatus(200);
 });
 
+app.get('/set_heater', (req, res) => {
+    heater = req.query.value;
+    console.log(`Heater set to: ${heater}`);
+    res.sendStatus(200);
+});
+
+app.get('/set_power', (req, res) => {
+    power = req.query.value;
+    console.log(`Power set to: ${power}`);
+    res.sendStatus(200);
+});
+
 app.get('/events', (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -44,6 +60,8 @@ app.get('/events', (req, res) => {
 
     const interval = setInterval(() => {
         const data = {
+            power: power,
+            heater: heater,
             fan_speed1: fanSpeed1,
             fan_speed2: fanSpeed2,
             fan_rpm1: fanSpeed1 * 2.77,

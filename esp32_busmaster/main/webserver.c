@@ -11,6 +11,8 @@
 #include <esp_wifi.h>
 #include "cJSON.h"
 
+const char *TAG = "webserver";
+
 esp_err_t index_handler(httpd_req_t *req)
 {
     httpd_resp_set_status(req, "302 Found");
@@ -19,12 +21,12 @@ esp_err_t index_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-esp_err_t fan_speed_handler(httpd_req_t *req)
+esp_err_t set_fan_speed_handler(httpd_req_t *req)
 {
     char buf[32];
     int len = httpd_req_get_url_query_len(req) + 1;
 
-    if (len > 1 && httpd_req_get_url_query_str(req, buf, len) == ESP_OK)
+    if (len > 1 && httpd_req_get_url_query_str(req, buf, sizeof(buf)) == ESP_OK)
     {
         int fan = 0, speed = 0;
         char param[8];
@@ -41,7 +43,7 @@ esp_err_t fan_speed_handler(httpd_req_t *req)
         if (fan < 1 || fan > 2 || speed < 0 || speed > 100)
             return ESP_ERR_HTTPD_INVALID_REQ;
 
-        ESP_LOGI("FAN", "Set fan %d speed to %d%%", fan, speed);
+        ESP_LOGI(TAG, "Set fan %d speed to %d%%", fan, speed);
 
         ui_values.fan_speeds[fan-1] = speed;
     }
@@ -50,7 +52,57 @@ esp_err_t fan_speed_handler(httpd_req_t *req)
     return ESP_OK;
 }
 
-const char *TAG = "webserver";
+esp_err_t set_power_handler(httpd_req_t *req)
+{
+    char buf[32];
+    int len = httpd_req_get_url_query_len(req) + 1;
+
+    if (len > 1 && httpd_req_get_url_query_str(req, buf, sizeof(buf)) == ESP_OK)
+    {
+        int value = 0;
+        char param[8];
+        if (httpd_query_key_value(buf, "value", param, sizeof(param)) == ESP_OK)
+            value = atoi(param);
+        else
+            return ESP_ERR_HTTPD_INVALID_REQ;
+        
+        if (value != 0 && value != 1)
+            return ESP_ERR_HTTPD_INVALID_REQ;
+
+        ESP_LOGI(TAG, "Set power to %d", value);
+
+        ui_values.power = value == 1;
+    }
+
+    httpd_resp_send(req, NULL, 0);
+    return ESP_OK;
+}
+
+esp_err_t set_heater_handler(httpd_req_t *req)
+{
+    char buf[32];
+    int len = httpd_req_get_url_query_len(req) + 1;
+
+    if (len > 1 && httpd_req_get_url_query_str(req, buf, sizeof(buf)) == ESP_OK)
+    {
+        int value = 0;
+        char param[8];
+        if (httpd_query_key_value(buf, "value", param, sizeof(param)) == ESP_OK)
+            value = atoi(param);
+        else
+            return ESP_ERR_HTTPD_INVALID_REQ;
+        
+        if (value < 0 || value > 100)
+            return ESP_ERR_HTTPD_INVALID_REQ;
+
+        ESP_LOGI(TAG, "Set heater to %d", value);
+
+        ui_values.heater = value;
+    }
+
+    httpd_resp_send(req, NULL, 0);
+    return ESP_OK;
+}
 
 esp_err_t scan_handler(httpd_req_t *req)
 {
@@ -162,12 +214,26 @@ void start_webserver(void)
             .user_ctx = NULL};
         httpd_register_uri_handler(server, &index_uri);
 
+        httpd_uri_t power_uri = {
+            .uri = "/set_power",
+            .method = HTTP_GET,
+            .handler = set_power_handler,
+            .user_ctx = NULL};
+        httpd_register_uri_handler(server, &power_uri);
+
         httpd_uri_t fan_uri = {
             .uri = "/set_fan_speed",
             .method = HTTP_GET,
-            .handler = fan_speed_handler,
+            .handler = set_fan_speed_handler,
             .user_ctx = NULL};
         httpd_register_uri_handler(server, &fan_uri);
+
+        httpd_uri_t heater_uri = {
+            .uri = "/set_heater",
+            .method = HTTP_GET,
+            .handler = set_heater_handler,
+            .user_ctx = NULL};
+        httpd_register_uri_handler(server, &heater_uri);
 
         sse_init();
         httpd_uri_t sse_uri = {
