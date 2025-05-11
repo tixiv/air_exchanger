@@ -35,7 +35,9 @@ void init_ports(void)
 heater_out_data_t tx_data;
 heater_in_data_t rx_data;
 
-fan_in_data_t rx_data_fan;
+fan_in_data_t in_data_fan;
+fan_out_data_t out_data_fan;
+
 mainboard_in_data_t rx_data_main;
 
 void heater_on()
@@ -57,7 +59,8 @@ void heater_off()
 }
 
 uint8_t timeout_count_rx_heater = 0xff;
-uint8_t timeout_count_rx_fan = 0xff;
+uint8_t timeout_count_in_fan = 0xff;
+uint8_t timeout_count_out_fan = 0xff;
 uint8_t timeout_count_rx_mainboard = 0xff;
 
 uint8_t pwm_count;
@@ -83,10 +86,13 @@ void update_heater()
 
 	uint8_t sanity_check = 0;
 
-	if (rx_data_fan.fan_pwm[0] > 200 && // fan commanded running
+	if (in_data_fan.fan_pwm[0] > 200 && // fan commanded running
 		(rx_data_main.power_flags & 0x01) && // fan 230V on
+		out_data_fan.fan_rpms[0] > 100 && // fan actually turning
+		out_data_fan.temperatures[0] < 350 && // Outside air after heater colder than 35°C
 		timeout_count_rx_heater < 200 &&
-		timeout_count_rx_fan < 200 &&
+		timeout_count_in_fan < 200 &&
+		timeout_count_out_fan < 200 &&
 		timeout_count_rx_mainboard < 200)
 	{
 		sanity_check = 1;
@@ -124,8 +130,10 @@ int main(){
 	while(1){
 		if (timeout_count_rx_heater < 0xff)
 			timeout_count_rx_heater++;
-		if (timeout_count_rx_fan < 0xff)
-			timeout_count_rx_fan++;
+		if (timeout_count_in_fan < 0xff)
+			timeout_count_in_fan++;
+		if (timeout_count_out_fan < 0xff)
+			timeout_count_out_fan++;
 		if (timeout_count_rx_mainboard < 0xff)
 			timeout_count_rx_mainboard++;
 
@@ -146,9 +154,16 @@ int main(){
 
 			if (buf->address == 4 && buf->command == 1)
 			{
-				memcpy(&rx_data_fan, buf->data, sizeof(rx_data_fan));
+				memcpy(&in_data_fan, buf->data, sizeof(in_data_fan));
 
-				timeout_count_rx_fan = 0;
+				timeout_count_in_fan = 0;
+			}
+
+			if (buf->address == 1 && buf->command == 4)
+			{
+				memcpy(&out_data_fan, buf->data, sizeof(out_data_fan));
+
+				timeout_count_out_fan = 0;
 			}
 
 			if (buf->address == 2 && buf->command == 1)

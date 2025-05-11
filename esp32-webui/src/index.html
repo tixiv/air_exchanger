@@ -30,7 +30,7 @@
             <!-- Fan 1 -->
             <div class="flex items-center space-x-4">
                 <div class="flex-1">
-                    <label for="fanSpeedSlider1" class="block mb-1">Innen ← Außen</label>
+                    <label for="fanSpeedSlider1" class="block mb-1">Zuluft</label>
                     <input type="range" id="fanSpeedSlider1" class="range range-primary w-full" min="0" max="100"
                         value="0">
                 </div>
@@ -45,7 +45,7 @@
             <!-- Fan 2 -->
             <div class="flex items-center space-x-4">
                 <div class="flex-1">
-                    <label for="fanSpeedSlider2" class="block mb-1">Innen → Außen</label>
+                    <label for="fanSpeedSlider2" class="block mb-1">Abluft</label>
                     <input type="range" id="fanSpeedSlider2" class="range range-primary w-full" min="0" max="100"
                         value="0">
                 </div>
@@ -67,7 +67,7 @@
                     class="range range-primary flex-grow" />
                 <!-- Temperature readout now takes 20% of the space -->
                 <div class="stat bg-base-100 p-4 rounded-box w-1/5">
-                    <div class="stat-title">Außenluft</div>
+                    <div class="stat-title">T5: Außenluft</div>
                     <div class="stat-value text-primary"><span id="temperatureValue5">--</span>°C</div>
                 </div>
             </div>
@@ -79,19 +79,19 @@
 
             <div class="grid grid-cols-2 gap-4 text-sm">
                 <div class="stat bg-base-100 p-4 rounded-box">
-                    <div class="stat-title">Sensor 1</div>
-                    <div class="stat-value text-primary"><span id="temperatureValue1">--</span>°C</div>
-                </div>
-                <div class="stat bg-base-100 p-4 rounded-box">
-                    <div class="stat-title">Sensor 2</div>
+                    <div class="stat-title">T2: Zuluft</div>
                     <div class="stat-value text-primary"><span id="temperatureValue2">--</span>°C</div>
                 </div>
                 <div class="stat bg-base-100 p-4 rounded-box">
-                    <div class="stat-title">Sensor 3</div>
+                    <div class="stat-title">T1: Außenluft n. Hzg.</div>
+                    <div class="stat-value text-primary"><span id="temperatureValue1">--</span>°C</div>
+                </div>
+                <div class="stat bg-base-100 p-4 rounded-box">
+                    <div class="stat-title">T3: Abluft</div>
                     <div class="stat-value text-primary"><span id="temperatureValue3">--</span>°C</div>
                 </div>
                 <div class="stat bg-base-100 p-4 rounded-box">
-                    <div class="stat-title">Sensor 4</div>
+                    <div class="stat-title">T4: Fortluft</div>
                     <div class="stat-value text-primary"><span id="temperatureValue4">--</span>°C</div>
                 </div>
             </div>
