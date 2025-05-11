@@ -189,8 +189,9 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    rs485_data_mutex = xSemaphoreCreateMutex();
     rs485_uart_init();
+    rs485_data_mutex = xSemaphoreCreateMutex();
+    xTaskCreate(bus_master_task, "bus_master", 2048, NULL, 22, NULL);
 
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -220,10 +221,4 @@ void app_main(void)
     xTaskCreate(telnet_server_task, "telnet_server", 4096, NULL, 5, NULL);
 
     start_webserver();
-
-    while (1)
-    {
-        handle_bus_master();
-        vTaskDelay(1);
-    }
 }

@@ -65,10 +65,10 @@ static void update_heater_tx_data()
 	heater_tx_data.heater_duty = ui_values.power ? ui_values.heater : 0;
 }
 
-uint8_t device_index;
-uint8_t timeout_counter;
+static uint8_t device_index;
+static uint8_t timeout_counter;
 
-void handle_bus_master()
+static void handle_bus_master()
 {
 	static int delay_count;
 
@@ -102,10 +102,10 @@ void handle_bus_master()
 
 	if (timeout_counter == 0)
 	{
-		if (delay_count++ == 10)
+		if (delay_count++ == 2)
 		{
 			delay_count = 0;
-			timeout_counter = 25;
+			timeout_counter = 5;
 
 			switch (device_index)
 			{
@@ -135,5 +135,14 @@ void handle_bus_master()
 		{
 			printf("Receive Timeout %d\r\n", device_index);
 		}
+	}
+}
+
+void bus_master_task(void *)
+{
+	while (1)
+	{
+		handle_bus_master();
+		vTaskDelay(1);
 	}
 }
