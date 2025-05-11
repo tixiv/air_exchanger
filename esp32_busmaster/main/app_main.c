@@ -23,7 +23,6 @@
 #include "mqtt_client.h"
 #include "mdns.h"
 
-#include "rs485_uart.h"
 #include "bus_master.h"
 #include "telnet_server.h"
 #include "webserver.h"
@@ -189,7 +188,6 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    rs485_uart_init();
     rs485_data_mutex = xSemaphoreCreateMutex();
     xTaskCreate(bus_master_task, "bus_master", 2048, NULL, 22, NULL);
 

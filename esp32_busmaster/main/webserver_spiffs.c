@@ -88,11 +88,6 @@ esp_err_t spiffs_get_handler(httpd_req_t *req) {
         }
     }
 
-    if (read_bytes < 0)
-    {
-        ESP_LOGE(TAG, "Fread failed. errno=%d", errno);
-    }
-
     fclose(file);
     httpd_resp_send_chunk(req, NULL, 0); // End response
     return ESP_OK;

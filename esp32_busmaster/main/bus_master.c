@@ -2,6 +2,7 @@
 #include "bus_master.h"
 #include "../../common/rs485_com.h"
 #include "ui_values.h"
+#include "rs485_uart.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -140,6 +141,7 @@ static void handle_bus_master()
 
 void bus_master_task(void *)
 {
+	rs485_uart_init();
 	while (1)
 	{
 		handle_bus_master();
