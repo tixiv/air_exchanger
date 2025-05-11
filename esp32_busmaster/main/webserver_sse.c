@@ -45,6 +45,7 @@ const char *createMessage()
         cJSON_AddNumberToObject(root, "temperature2", rs485_data.temperatures[1]);
         cJSON_AddNumberToObject(root, "temperature3", rs485_data.temperatures[2]);
         cJSON_AddNumberToObject(root, "temperature4", rs485_data.temperatures[3]);
+        cJSON_AddNumberToObject(root, "temperature5", rs485_data.temperatures[4]);
         xSemaphoreGive(rs485_data_mutex);
     }
 

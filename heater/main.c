@@ -61,13 +61,18 @@ uint8_t timeout_count_rx_fan = 0xff;
 uint8_t timeout_count_rx_mainboard = 0xff;
 
 uint8_t pwm_count;
+uint8_t pwm_out;
 
 void update_heater()
 {
-	uint8_t pwm_out = 0;
-	if (pwm_count < rx_data.heater_duty)
+	if (pwm_count == 0)
 	{
 		pwm_out = 1;
+	}
+
+	if (pwm_count >= rx_data.heater_duty)
+	{
+		pwm_out = 0;
 	}
 
 	pwm_count++;
@@ -92,7 +97,10 @@ void update_heater()
 		tx_data.heater_duty_readback = 0;
 	}
 
-	if (sanity_check && pwm_out)
+	if (!sanity_check)
+		pwm_out = 0;
+
+	if (pwm_out)
 	{
 		heater_on();
 	}
@@ -131,7 +139,7 @@ int main(){
 
 				memcpy(tx_data.temperatures, temperatures, sizeof(tx_data.temperatures));
 
-				rs485_transmit(1, 5, &tx_data, sizeof(tx_data));
+				rs485_schedule_reply(1, 5, &tx_data, sizeof(tx_data));
 
 				timeout_count_rx_heater = 0;
 			}

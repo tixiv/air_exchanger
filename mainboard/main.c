@@ -73,11 +73,11 @@ int main(){
 				memcpy(&tx_data.adc_values, adc_filtered, sizeof(tx_data.adc_values));
 				tx_data.inputs = (PINA & 0x30) >> 4;
 
-				rs485_transmit(1, 2, &tx_data, sizeof(tx_data));
+				rs485_schedule_reply(1, 2, &tx_data, sizeof(tx_data));
 			}
 
 		}
-		_delay_us(100);
+		_delay_us(1000);
 
 		update_adc();
 	}

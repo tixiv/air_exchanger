@@ -70,6 +70,7 @@ app.get('/events', (req, res) => {
             temperature2: Math.random() * 30,
             temperature3: Math.random() * 30,
             temperature4: Math.random() * 30,
+            temperature5: Math.random() * 30,
         };
 
         res.write(`data: ${JSON.stringify(data)}\n\n`);

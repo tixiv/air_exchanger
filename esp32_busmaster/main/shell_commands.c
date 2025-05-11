@@ -6,7 +6,7 @@
 
 int print_status(int, char *[])
 {
-	for (uint8_t i = 0; i < 4; i++)
+	for (uint8_t i = 0; i < 5; i++)
 	{
 		printf("T%d: %f°C,", i + 1, rs485_data.temperatures[i]);
 	}

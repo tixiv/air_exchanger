@@ -49,6 +49,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         set_temperature(2, data.temperature2);
         set_temperature(3, data.temperature3);
         set_temperature(4, data.temperature4);
+        set_temperature(5, data.temperature5);
         evtSource.onerror = function (err) {
             console.error('EventSource failed:', err);
         };
@@ -132,4 +133,5 @@ interface EventData {
     temperature2: number;
     temperature3: number;
     temperature4: number;
+    temperature5: number;
 }

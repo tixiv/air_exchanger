@@ -20,8 +20,8 @@ static uint16_t adc_values[2];
 
 static void readADC(void)
 {
-    adc_values[0] = read_adc_channel(5);
-    adc_values[1] = read_adc_channel(6);
+    adc_values[1] = read_adc_channel(5);
+    adc_values[0] = read_adc_channel(6);
 }
 
 static uint16_t filter_akk[2];

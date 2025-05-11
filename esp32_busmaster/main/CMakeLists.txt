@@ -4,3 +4,6 @@ idf_component_register(SRCS "app_main.c" "rs485_com.c" "rs485_uart.c" "bus_maste
                     INCLUDE_DIRS ".")
 
 spiffs_create_partition_image(www ${CMAKE_CURRENT_SOURCE_DIR}/../../esp32-webui/spiffs FLASH_IN_PROJECT)
+
+# This is equivalent to adding WHOLE_ARCHIVE option to the idf_component_register call above:
+idf_component_set_property(${COMPONENT_NAME} WHOLE_ARCHIVE TRUE)

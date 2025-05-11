@@ -106,7 +106,7 @@ static void handle_bus_master()
 		if (delay_count++ == 2)
 		{
 			delay_count = 0;
-			timeout_counter = 5;
+			timeout_counter = 20;
 
 			switch (device_index)
 			{
@@ -123,10 +123,10 @@ static void handle_bus_master()
 				rs485_transmit(5, 1, &heater_tx_data, sizeof(heater_tx_data));
 				break;
 			}
-
 			device_index++;
 			if (device_index == 3)
 				device_index = 0;
+
 		}
 	}
 	else

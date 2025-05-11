@@ -10,6 +10,7 @@
 #include "uart/uart.h"
 #include "rs485_com.h"
 #include "fan_pwm.h"
+#include "fan_rpm.h"
 #include "adc.h"
 #include "rs485_structs.h"
 
@@ -42,6 +43,7 @@ int main(){
 	_delay_ms(100);
 
 	init_fan_pwm();
+	init_fan_rpm();
 
 	sei();
 
@@ -56,12 +58,14 @@ int main(){
 				set_pwm(rx_data.fan_pwm[0], rx_data.fan_pwm[1]);
 
 				memcpy(tx_data.temperatures, temperatures, sizeof(temperatures));
+				tx_data.fan_rpms[0] = fan_rpm_1;
+				tx_data.fan_rpms[1] = fan_rpm_2;
 
-				rs485_transmit(1, 4, &tx_data, sizeof(tx_data));
+				rs485_schedule_reply(1, 4, &tx_data, sizeof(tx_data));
 			}
 
 		}
-		_delay_us(100);
+		_delay_us(1000);
 
 		update_adc();
 	}
