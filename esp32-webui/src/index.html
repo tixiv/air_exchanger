@@ -13,30 +13,43 @@
     <div id="navbar" class="mb-4"></div>
 
     <main class="max-w-2xl mx-auto px-4 space-y-8">
-        <section class="card shadow-lg bg-base-200 p-6">
-            <div class="container space-y-6 max-w-md mx-auto">
-                <h1 class="text-3xl font-bold mb-6 text-center">Lüfter</h1>
 
-                <!-- Fan 1 -->
-                <div class="flex items-center space-x-4">
-                    <div class="flex-1">
-                        <label for="fanSpeedSlider1" class="block mb-1">Innen ← Außen</label>
-                        <input type="range" id="fanSpeedSlider1" class="range range-primary w-full" min="0" max="100"
-                            value="0">
-                    </div>
+        <!-- Power Switch Section -->
+        <section class="card bg-base-200 p-4 shadow-md">
+            <h2 class="text-xl font-semibold mb-2">An / Aus</h2>
+            <label class="label cursor-pointer justify-start gap-4">
+                <span class="label-text text-lg">An</span>
+                <input type="checkbox" class="toggle toggle-lg" id="systemPowerSwitch" />
+            </label>
+        </section>
+
+        <!-- Fan Control Section -->
+        <section class="card bg-base-200 p-4 shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Lüfter</h2>
+
+            <!-- Fan 1 -->
+            <div class="flex items-center space-x-4">
+                <div class="flex-1">
+                    <label for="fanSpeedSlider1" class="block mb-1">Innen ← Außen</label>
+                    <input type="range" id="fanSpeedSlider1" class="range range-primary w-full" min="0" max="100"
+                        value="0">
+                </div>
+                <div class="stat bg-base-100 p-4 rounded-box w-1/5">
                     <div class="text-lg w-24 text-right">
                         <span id="fanSpeedValue1">--</span>%<br>
                         <span class="text-sm text-gray-400"><span id="fanRPM1">--</span> RPM</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Fan 2 -->
-                <div class="flex items-center space-x-4">
-                    <div class="flex-1">
-                        <label for="fanSpeedSlider2" class="block mb-1">Innen → Außen</label>
-                        <input type="range" id="fanSpeedSlider2" class="range range-primary w-full" min="0" max="100"
-                            value="0">
-                    </div>
+            <!-- Fan 2 -->
+            <div class="flex items-center space-x-4">
+                <div class="flex-1">
+                    <label for="fanSpeedSlider2" class="block mb-1">Innen → Außen</label>
+                    <input type="range" id="fanSpeedSlider2" class="range range-primary w-full" min="0" max="100"
+                        value="0">
+                </div>
+                <div class="stat bg-base-100 p-4 rounded-box w-1/5">
                     <div class="text-lg w-24 text-right">
                         <span id="fanSpeedValue2">--</span>%<br>
                         <span class="text-sm text-gray-400"><span id="fanRPM2">--</span> RPM</span>
@@ -46,7 +59,22 @@
 
         </section>
 
-        <section class="card shadow-lg bg-base-200 p-6">
+        <!-- Heater Section -->
+        <section class="card bg-base-200 p-4 shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Heizung</h2>
+            <div class="flex items-center gap-4">
+                <input type="range" min="0" max="100" value="0" id="heaterSlider"
+                    class="range range-primary flex-grow" />
+                <!-- Temperature readout now takes 20% of the space -->
+                <div class="stat bg-base-100 p-4 rounded-box w-1/5">
+                    <div class="stat-title">Außenluft</div>
+                    <div class="stat-value text-primary"><span id="heaterTemperature">--</span>°C</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Temperature Readouts -->
+        <section class="card bg-base-200 p-4 shadow-md">
             <h2 class="text-xl font-semibold mb-4">Temperaturen</h2>
 
             <div class="grid grid-cols-2 gap-4 text-sm">
