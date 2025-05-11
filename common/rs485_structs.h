@@ -9,6 +9,7 @@ typedef struct
 typedef struct
 {
 	int16_t temperatures[4];
+	uint16_t fan_rpms[2];
 } fan_out_data_t;
 
 typedef struct {

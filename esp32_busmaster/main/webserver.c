@@ -37,14 +37,13 @@ esp_err_t fan_speed_handler(httpd_req_t *req)
             speed = atoi(param);
         else
             return ESP_ERR_HTTPD_INVALID_REQ;
+        
+        if (fan < 1 || fan > 2 || speed < 0 || speed > 100)
+            return ESP_ERR_HTTPD_INVALID_REQ;
 
         ESP_LOGI("FAN", "Set fan %d speed to %d%%", fan, speed);
 
-        if (fan == 1)
-            ui_values.fan_speed1 = speed;
-
-        if (fan == 2)
-            ui_values.fan_speed2 = speed;
+        ui_values.fan_speeds[fan-1] = speed;
     }
 
     httpd_resp_send(req, NULL, 0);

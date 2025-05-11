@@ -1,12 +1,15 @@
+
 #include "webserver_sse.h"
+
+#include "ui_values.h"
+#include "bus_master.h"
+
 #include <string.h>
 #include <sys/socket.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "cJSON.h"
-#include "ui_values.h"
-
 
 struct UI_values ui_values;
 
@@ -29,12 +32,19 @@ static void add_client(int fd) {
 const char *createMessage()
 {
     cJSON *root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "fan_speed1", ui_values.fan_speed1);
-    cJSON_AddNumberToObject(root, "fan_speed2", ui_values.fan_speed2);
-    cJSON_AddNumberToObject(root, "temperature1", 12.5);
-    cJSON_AddNumberToObject(root, "temperature2", 13.5);
-    cJSON_AddNumberToObject(root, "temperature3", 14.5);
-    cJSON_AddNumberToObject(root, "temperature4", 15.5);
+    cJSON_AddNumberToObject(root, "fan_speed1", ui_values.fan_speeds[0]);
+    cJSON_AddNumberToObject(root, "fan_speed2", ui_values.fan_speeds[1]);
+
+    if (xSemaphoreTake(rs485_data_mutex, portMAX_DELAY))
+	{
+        cJSON_AddNumberToObject(root, "fan_rpm1", rs485_data.fan_rpms[0]);
+        cJSON_AddNumberToObject(root, "fan_rpm2", rs485_data.fan_rpms[1]);
+        cJSON_AddNumberToObject(root, "temperature1", rs485_data.temperatures[0]);
+        cJSON_AddNumberToObject(root, "temperature2", rs485_data.temperatures[1]);
+        cJSON_AddNumberToObject(root, "temperature3", rs485_data.temperatures[2]);
+        cJSON_AddNumberToObject(root, "temperature4", rs485_data.temperatures[3]);
+        xSemaphoreGive(rs485_data_mutex);
+    }
 
     const char *json_str = cJSON_PrintUnformatted(root);
     cJSON_Delete(root);

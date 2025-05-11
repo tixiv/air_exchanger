@@ -14,21 +14,36 @@
 
     <main class="max-w-2xl mx-auto px-4 space-y-8">
         <section class="card shadow-lg bg-base-200 p-6">
-            <h2 class="text-xl font-semibold mb-4">Lüftersteuerung</h2>
+            <div class="container space-y-6 max-w-md mx-auto">
+                <h1 class="text-3xl font-bold mb-6 text-center">Lüfter</h1>
 
-            <div class="space-y-4">
-                <div>
-                    <label for="fanSpeedSlider1" class="label">Innen → Außen</label>
-                    <input type="range" id="fanSpeedSlider1" class="range" min="0" max="100" />
-                    <p class="text-sm mt-1">Aktuell: <span id="fanSpeedValue1">--</span>%</p>
+                <!-- Fan 1 -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex-1">
+                        <label for="fanSpeedSlider1" class="block mb-1">Innen ← Außen</label>
+                        <input type="range" id="fanSpeedSlider1" class="range range-primary w-full" min="0" max="100"
+                            value="0">
+                    </div>
+                    <div class="text-lg w-24 text-right">
+                        <span id="fanSpeedValue1">--</span>%<br>
+                        <span class="text-sm text-gray-400"><span id="fanRPM1">--</span> RPM</span>
+                    </div>
                 </div>
 
-                <div>
-                    <label for="fanSpeedSlider2" class="label">Außen → Innen</label>
-                    <input type="range" id="fanSpeedSlider2" class="range" min="0" max="100" />
-                    <p class="text-sm mt-1">Aktuell: <span id="fanSpeedValue2">--</span>%</p>
+                <!-- Fan 2 -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex-1">
+                        <label for="fanSpeedSlider2" class="block mb-1">Innen → Außen</label>
+                        <input type="range" id="fanSpeedSlider2" class="range range-primary w-full" min="0" max="100"
+                            value="0">
+                    </div>
+                    <div class="text-lg w-24 text-right">
+                        <span id="fanSpeedValue2">--</span>%<br>
+                        <span class="text-sm text-gray-400"><span id="fanRPM2">--</span> RPM</span>
+                    </div>
                 </div>
             </div>
+
         </section>
 
         <section class="card shadow-lg bg-base-200 p-6">

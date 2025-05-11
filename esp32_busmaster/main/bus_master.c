@@ -1,6 +1,7 @@
 
 #include "bus_master.h"
 #include "../../common/rs485_com.h"
+#include "ui_values.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -14,8 +15,47 @@ fan_out_data_t fan_rx_data;
 heater_in_data_t heater_tx_data;
 heater_out_data_t heater_rx_data;
 
-uint8_t device_index;
+SemaphoreHandle_t rs485_data_mutex;
+struct RS485_data rs485_data;
 
+static void update_fan_rx_data()
+{
+	if (xSemaphoreTake(rs485_data_mutex, portMAX_DELAY))
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			rs485_data.temperatures[i] = fan_rx_data.temperatures[i] / 10.0f;
+		}
+
+		for (int i = 0; i < 2; i++)
+		{
+			rs485_data.fan_rpms[i] = fan_rx_data.fan_rpms[i];
+		}
+
+		xSemaphoreGive(rs485_data_mutex);
+	}
+}
+
+static void update_heater_rx_data()
+{
+	if (xSemaphoreTake(rs485_data_mutex, portMAX_DELAY))
+	{
+		rs485_data.temperatures[4] = heater_rx_data.temperatures[0] / 10.0f;
+		rs485_data.heater_duty_readback = heater_rx_data.heater_duty_readback;
+
+		xSemaphoreGive(rs485_data_mutex);
+	}
+}
+
+static void update_fan_tx_data()
+{
+	for (int i = 0; i < 2; i++)
+	{
+		fan_tx_data.fan_pwm[i] = ui_values.fan_speeds[i] * (1023.0f / 100.0f);
+	}
+}
+
+uint8_t device_index;
 uint8_t timeout_counter;
 
 void handle_bus_master()
@@ -38,12 +78,14 @@ void handle_bus_master()
 			{
 				timeout_counter = 0;
 				memcpy(&fan_rx_data, received->data, sizeof(fan_rx_data));
+				update_fan_rx_data();
 			}
 
 			if (received->address == 1 && received->command == 5)
 			{
 				timeout_counter = 0;
 				memcpy(&heater_rx_data, received->data, sizeof(heater_rx_data));
+				update_heater_rx_data();
 			}
 		}
 	}
@@ -61,6 +103,7 @@ void handle_bus_master()
 				rs485_transmit(2, 1, &mainboard_tx_data, sizeof(mainboard_tx_data));
 				break;
 			case 1:
+				update_fan_tx_data();
 				rs485_transmit(4, 1, &fan_tx_data, sizeof(fan_tx_data));
 				break;
 			case 2:

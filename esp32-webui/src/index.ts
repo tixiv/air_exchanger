@@ -36,6 +36,15 @@ function setFanSpeed(fan: number, speed: number, transmit: boolean, setSlider: b
     }
 }
 
+function set_fan_rpm(index: number, rpm: number)
+{
+    const htmlSpan = document.getElementById(`fanRPM${index}`) as HTMLSpanElement;
+
+    if (htmlSpan) {
+        htmlSpan.textContent = `${rpm}`;
+    }
+}
+
 // Listen to slider change and send value to ESP32
 for (let i = 1; i <= 2; i++) {
     const fanSpeedSlider = document.getElementById(`fanSpeedSlider${i}`) as HTMLInputElement;
@@ -50,6 +59,8 @@ for (let i = 1; i <= 2; i++) {
 interface EventData {
     fan_speed1: number;
     fan_speed2: number;
+    fan_rpm1: number;
+    fan_rpm2: number;
     temperature1: number;
     temperature2: number;
     temperature3: number;
@@ -64,6 +75,8 @@ evtSource.onmessage = function (event: MessageEvent) {
 
     setFanSpeed(1, data.fan_speed1, false, true);
     setFanSpeed(2, data.fan_speed2, false, true);
+    set_fan_rpm(1, data.fan_rpm1);
+    set_fan_rpm(2, data.fan_rpm2);
     set_temperature(1, data.temperature1);
     set_temperature(2, data.temperature2);
     set_temperature(3, data.temperature3);

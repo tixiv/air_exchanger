@@ -46,6 +46,8 @@ app.get('/events', (req, res) => {
         const data = {
             fan_speed1: fanSpeed1,
             fan_speed2: fanSpeed2,
+            fan_rpm1: fanSpeed1 * 2.77,
+            fan_rpm2: fanSpeed2 * 2.77,
             temperature1: Math.random() * 60,
             temperature2: Math.random() * 30,
             temperature3: Math.random() * 30,
