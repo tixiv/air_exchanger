@@ -4,7 +4,6 @@
 .vscode/launch.json
 .vscode/ipch
 /build/
-sdkconfig
 sdkconfig.old
 managed_components/
 
