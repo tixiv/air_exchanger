@@ -38,20 +38,25 @@ static void log_error_if_nonzero(const char *message, int error_code)
     }
 }
 
-#define RESET_BUTTON_GPIO 0
 
-void check_reset_button() {
+#define WIFI_RESET_BUTTON_GPIO  13
+
+void init_wifi_reset_button() {
     gpio_config_t io_conf = {
-        .pin_bit_mask = 1ULL << RESET_BUTTON_GPIO,
+        .pin_bit_mask = 1ULL << WIFI_RESET_BUTTON_GPIO,
         .mode = GPIO_MODE_INPUT,
         .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE
     };
     gpio_config(&io_conf);
+}
 
-    if (gpio_get_level(RESET_BUTTON_GPIO) == 0) {
+
+void check_reset_button() {
+    if (gpio_get_level(WIFI_RESET_BUTTON_GPIO) == 0) {
         ESP_LOGW("RESET", "Reset button held down, clearing credentials...");
         clear_wifi_credentials();
-        esp_restart();
     }
 }
 
@@ -163,9 +168,11 @@ static void mqtt_app_start(void)
 
 static void my_mdns_init(void)
 {
+    
     ESP_ERROR_CHECK(mdns_init());
-    ESP_ERROR_CHECK(mdns_hostname_set("esp32-device"));
-    ESP_ERROR_CHECK(mdns_service_add("esp32-service", "_http", "_tcp", 80, NULL, 0));
+    ESP_ERROR_CHECK(mdns_hostname_set("air-exchanger"));
+    ESP_ERROR_CHECK(mdns_instance_name_set("Air Exchanger Control mDNS"));
+    ESP_ERROR_CHECK(mdns_service_add("Air Exchanger mDNS", "_http", "_tcp", 80, NULL, 0));
 
     ESP_LOGI("mDNS", "mDNS service started");
 }
@@ -184,12 +191,7 @@ void app_main(void)
     esp_log_level_set("transport", ESP_LOG_VERBOSE);
     esp_log_level_set("outbox", ESP_LOG_VERBOSE);
 
-    ESP_ERROR_CHECK(nvs_flash_init());
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-
-    rs485_data_mutex = xSemaphoreCreateMutex();
-    xTaskCreate(bus_master_task, "bus_master", 2048, NULL, 22, NULL);
+    init_wifi_reset_button();
 
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -197,7 +199,13 @@ void app_main(void)
         ESP_ERROR_CHECK(nvs_flash_init());
     }
 
-    check_reset_button();  // Optional: wipe config if button is pressed
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    rs485_data_mutex = xSemaphoreCreateMutex();
+    xTaskCreate(bus_master_task, "bus_master", 2048, NULL, 22, NULL);
+
+    check_reset_button();  // wipe config if button is pressed
 
     char ssid[32] = {0};
     char pass[64] = {0};
@@ -207,14 +215,14 @@ void app_main(void)
         start_wifi_sta(ssid, pass);
         // ESP_ERROR_CHECK(example_connect());
 
-        mqtt_app_start();
+        // mqtt_app_start();
     } else {
         ESP_LOGW("WiFi", "No saved credentials, starting in AP mode");
         wifi_init_ap_sta();
     }
 
     // After Wi-Fi connects:
-    // my_mdns_init();
+    my_mdns_init();
     
     xTaskCreate(telnet_server_task, "telnet_server", 4096, NULL, 5, NULL);
 

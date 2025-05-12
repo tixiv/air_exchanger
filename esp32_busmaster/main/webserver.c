@@ -193,6 +193,10 @@ esp_err_t connect_handler(httpd_req_t *req)
     httpd_resp_sendstr(req, "Connecting to Wi-Fi...");
 
     cJSON_Delete(json);
+
+    vTaskDelay(100);
+    esp_restart();
+
     return ESP_OK;
 }
 
