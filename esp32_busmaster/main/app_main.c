@@ -212,7 +212,8 @@ void app_main(void)
     if (load_wifi_credentials(ssid, sizeof(ssid), pass, sizeof(pass))) {
         ESP_LOGI("WiFi", "Found saved credentials, connecting to %s...", ssid);
         
-        start_wifi_sta(ssid, pass);
+        my_example_wifi_connect(ssid, pass);
+        // start_wifi_sta(ssid, pass);
         // ESP_ERROR_CHECK(example_connect());
 
         // mqtt_app_start();

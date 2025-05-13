@@ -13,3 +13,5 @@ esp_err_t save_wifi_credentials(const char *ssid, const char *pass);
 bool load_wifi_credentials(char *ssid, size_t ssid_len, char *pass, size_t pass_len);
 
 void clear_wifi_credentials();
+
+esp_err_t my_example_wifi_connect(const char *ssid, const char *pass);
