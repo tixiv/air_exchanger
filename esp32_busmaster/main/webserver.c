@@ -1,7 +1,7 @@
 
 #include "webserver.h"
 
-#include "wifi_connect.h"
+#include "wifi.h"
 #include "webserver_spiffs.h"
 #include "webserver_sse.h"
 #include "ui_values.h"
@@ -11,7 +11,7 @@
 #include <esp_wifi.h>
 #include "cJSON.h"
 
-const char *TAG = "webserver";
+static const char *TAG = "webserver";
 
 esp_err_t index_handler(httpd_req_t *req)
 {

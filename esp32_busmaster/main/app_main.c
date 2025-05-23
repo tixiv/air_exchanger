@@ -19,14 +19,13 @@
 #include "esp_wifi.h"
 #include "protocol_examples_common.h"
 #include "esp_log.h"
-#include "driver/gpio.h"
 #include "mqtt_client.h"
 #include "mdns.h"
 
 #include "bus_master.h"
 #include "telnet_server.h"
 #include "webserver.h"
-#include "wifi_connect.h"
+#include "wifi.h"
 
 static const char *TAG = "mqtt_example";
 
@@ -37,29 +36,6 @@ static void log_error_if_nonzero(const char *message, int error_code)
         ESP_LOGE(TAG, "Last error %s: 0x%x", message, error_code);
     }
 }
-
-
-#define WIFI_RESET_BUTTON_GPIO  13
-
-void init_wifi_reset_button() {
-    gpio_config_t io_conf = {
-        .pin_bit_mask = 1ULL << WIFI_RESET_BUTTON_GPIO,
-        .mode = GPIO_MODE_INPUT,
-        .pull_up_en = GPIO_PULLUP_ENABLE,
-        .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_DISABLE
-    };
-    gpio_config(&io_conf);
-}
-
-
-void check_reset_button() {
-    if (gpio_get_level(WIFI_RESET_BUTTON_GPIO) == 0) {
-        ESP_LOGW("RESET", "Reset button held down, clearing credentials...");
-        clear_wifi_credentials();
-    }
-}
-
 
 /*
  * @brief Event handler registered to receive MQTT events
@@ -177,6 +153,29 @@ static void my_mdns_init(void)
     ESP_LOGI("mDNS", "mDNS service started");
 }
 
+struct {
+    bool simulate_rs485;
+}my_config;
+
+static void loadConfig()
+{
+    nvs_handle_t nvs;
+    esp_err_t err = nvs_open("config", NVS_READONLY, &nvs);
+    if (err != ESP_OK) return;
+
+	int32_t value;
+
+    if (nvs_get_i32(nvs, "simulate_rs485", &value) != ESP_OK)
+    {
+        nvs_close(nvs);
+        return;
+    }
+
+    my_config.simulate_rs485 = value ? true : false;
+
+    nvs_close(nvs);
+}
+
 void app_main(void)
 {
     ESP_LOGI(TAG, "[APP] Startup..");
@@ -191,7 +190,7 @@ void app_main(void)
     esp_log_level_set("transport", ESP_LOG_VERBOSE);
     esp_log_level_set("outbox", ESP_LOG_VERBOSE);
 
-    init_wifi_reset_button();
+    init_wifi_gpios();
 
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
@@ -202,25 +201,20 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
+    loadConfig();
+
     rs485_data_mutex = xSemaphoreCreateMutex();
-    xTaskCreate(bus_master_task, "bus_master", 2048, NULL, 22, NULL);
 
-    check_reset_button();  // wipe config if button is pressed
-
-    char ssid[32] = {0};
-    char pass[64] = {0};
-    if (load_wifi_credentials(ssid, sizeof(ssid), pass, sizeof(pass))) {
-        ESP_LOGI("WiFi", "Found saved credentials, connecting to %s...", ssid);
-        
-        my_example_wifi_connect(ssid, pass);
-        // start_wifi_sta(ssid, pass);
-        // ESP_ERROR_CHECK(example_connect());
-
-        // mqtt_app_start();
-    } else {
-        ESP_LOGW("WiFi", "No saved credentials, starting in AP mode");
-        wifi_init_ap_sta();
+    if (my_config.simulate_rs485)
+    {
+        // TODO: actually simulate. just don't run RS485 bus master for now.
     }
+    else
+    {
+        xTaskCreate(bus_master_task, "bus_master", 2048, NULL, 22, NULL);
+    }
+
+    wifi_init();
 
     // After Wi-Fi connects:
     my_mdns_init();
