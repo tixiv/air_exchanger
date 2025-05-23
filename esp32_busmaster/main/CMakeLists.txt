@@ -1,5 +1,5 @@
 
-idf_component_register(SRCS "app_main.c" "rs485_com.c" "rs485_uart.c" "bus_master.c" "telnet_server.c" "shell_task.c" "webserver.c" "webserver_spiffs.c" "wifi.c" "wifi_connect.c" "webserver_sse.c" "shell_commands.c"
+idf_component_register(SRCS "app_main.c" "rs485_com.c" "rs485_uart.c" "bus_master.c" "telnet_server.c" "shell_task.c" "webserver.c" "webserver_spiffs.c" "wifi.c" "wifi_connect.c" "webserver_sse.c" "shell_commands.c" "mqtt_app.c"
                     PRIV_REQUIRES mqtt nvs_flash esp_netif esp_driver_uart shell esp_http_server fatfs spiffs json esp_wifi
                     INCLUDE_DIRS ".")
 
