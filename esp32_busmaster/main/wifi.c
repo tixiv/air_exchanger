@@ -102,14 +102,14 @@ static EventGroupHandle_t s_wifi_event_group;
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
 
+static int retryCounter;
+
 static void event_handler(void *arg, esp_event_base_t event_base,
                           int32_t event_id, void *event_data)
 {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
     {
         ESP_LOGI(TAG, "Wi-Fi STA disconnected event");
-        xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
-        gpio_set_level(WIFI_LED_GPIO, 0); // LED OFF
 
         wifi_event_sta_disconnected_t *disconn = event_data;
         if (disconn->reason == WIFI_REASON_ROAMING)
@@ -117,8 +117,20 @@ static void event_handler(void *arg, esp_event_base_t event_base,
             ESP_LOGD(TAG, "station roaming, do nothing");
             return;
         }
-        ESP_LOGI(TAG, "Wi-Fi disconnected %d, trying to reconnect...", disconn->reason);
-        esp_wifi_connect();
+
+        ESP_LOGI(TAG, "Wi-Fi disconnected %d", disconn->reason);
+
+        if (retryCounter)
+        {
+            retryCounter--;
+            ESP_LOGI(TAG, "trying to reconnect...");
+            esp_wifi_connect();
+        }
+        else
+        {
+            xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+            gpio_set_level(WIFI_LED_GPIO, 0); // LED OFF
+        }
     }
     else if (event_base == IP_EVENT && event_id == WIFI_EVENT_STA_CONNECTED)
     {
@@ -141,12 +153,12 @@ static void event_handler(void *arg, esp_event_base_t event_base,
     }
 }
 
-static void register_event_handlers(void)
+static void register_event_handlers(esp_netif_t *sta_netif)
 {
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &event_handler, NULL, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &event_handler, NULL, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, NULL));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_GOT_IP6, &event_handler, NULL, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_STA_DISCONNECTED, &event_handler, sta_netif, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT, WIFI_EVENT_STA_CONNECTED, &event_handler, sta_netif, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, sta_netif, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT, IP_EVENT_GOT_IP6, &event_handler, sta_netif, NULL));
 }
 
 static esp_err_t my_example_wifi_sta_do_disconnect(void)
@@ -168,9 +180,9 @@ void wifi_init()
     {
         ESP_LOGI(TAG, "Found saved credentials, connecting to %s...", ssid);
 
-        wifi_init_sta();
+        esp_netif_t *sta_netif = wifi_init_sta();
 
-        register_event_handlers();
+        register_event_handlers(sta_netif);
 
         wifi_config_t wifi_config = {
             .sta = {
@@ -189,7 +201,7 @@ void wifi_init()
     else
     {
         ESP_LOGW(TAG, "No saved credentials, starting in AP mode");
-        wifi_init_ap_sta();
-        register_event_handlers();
+        esp_netif_t *sta_netif = wifi_init_ap_sta();
+        register_event_handlers(sta_netif);
     }
 }

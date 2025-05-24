@@ -8,12 +8,10 @@ extern const char *example_ipv6_addr_types_to_str[6];
 
 static const char *TAG = "wifi_connect";
 
-esp_netif_t *wifi_sta_netif = NULL;
-
-void wifi_init_ap_sta(void)
+esp_netif_t *wifi_init_ap_sta(void)
 {
     // Create default interfaces for STA and AP
-    wifi_sta_netif = esp_netif_create_default_wifi_sta();
+    esp_netif_t *wifi_sta_netif = esp_netif_create_default_wifi_sta();
     esp_netif_create_default_wifi_ap();
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -41,9 +39,11 @@ void wifi_init_ap_sta(void)
     ESP_ERROR_CHECK(esp_wifi_start());
 
     ESP_LOGI(TAG, "Wi-Fi in AP+STA mode started");
+
+    return wifi_sta_netif;
 }
 
-void wifi_init_sta(void)
+esp_netif_t *wifi_init_sta(void)
 {
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -51,12 +51,14 @@ void wifi_init_sta(void)
     esp_netif_inherent_config_t esp_netif_config = ESP_NETIF_INHERENT_DEFAULT_WIFI_STA();
     esp_netif_config.if_desc = "netif_sta";
     esp_netif_config.route_prio = 128;
-    wifi_sta_netif = esp_netif_create_wifi(WIFI_IF_STA, &esp_netif_config);
+    esp_netif_t *wifi_sta_netif = esp_netif_create_wifi(WIFI_IF_STA, &esp_netif_config);
     esp_wifi_set_default_wifi_sta_handlers();
 
     ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_start());
+
+    return wifi_sta_netif;
 }
 
 esp_err_t my_example_wifi_sta_do_connect(wifi_config_t wifi_config)
